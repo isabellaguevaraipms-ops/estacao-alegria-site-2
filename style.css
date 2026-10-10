@@ -16,8 +16,6 @@
   --shadow: 0 14px 38px rgba(20, 61, 96, 0.11);
 }
 
-/* CONFIGURAÇÃO GERAL */
-
 * {
   margin: 0;
   padding: 0;
@@ -52,7 +50,7 @@ button {
 
 .container {
   width: min(1150px, 90%);
-  margin: 0 auto;
+  margin-inline: auto;
 }
 
 section {
@@ -128,8 +126,8 @@ section {
 
 .button {
   display: inline-flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 14px 24px;
   border: 0;
@@ -171,7 +169,6 @@ section {
 
 .section-heading p {
   color: var(--muted);
-  font-size: 1rem;
 }
 
 .section-tag {
@@ -187,7 +184,7 @@ section {
   text-transform: uppercase;
 }
 
-/* DESTAQUE PRINCIPAL - FOTO PERSONALIZADA */
+/* BANNER PRINCIPAL */
 
 .hero {
   position: relative;
@@ -198,8 +195,9 @@ section {
   background:
     linear-gradient(
       90deg,
-      rgba(9, 49, 81, 0.82),
-      rgba(9, 49, 81, 0.30)
+      rgba(9, 49, 81, 0.82) 0%,
+      rgba(9, 49, 81, 0.52) 45%,
+      rgba(9, 49, 81, 0.12) 100%
     ),
     url("./piscina-estacao.jpg") center / cover no-repeat;
 }
@@ -207,7 +205,8 @@ section {
 .hero-content {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  width: min(1150px, 90%);
+  margin-inline: auto;
   padding: 80px 0;
   color: #ffffff;
 }
@@ -224,6 +223,7 @@ section {
 }
 
 .hero h1 {
+  max-width: 750px;
   margin-bottom: 22px;
   font-size: clamp(2.6rem, 6vw, 4.7rem);
   font-weight: 900;
@@ -347,8 +347,8 @@ section {
 }
 
 .gallery-item {
-  overflow: hidden;
   height: 250px;
+  overflow: hidden;
   border: 5px solid #ffffff;
   border-radius: 20px;
   box-shadow: var(--shadow);
@@ -428,7 +428,7 @@ section {
   color: var(--muted);
 }
 
-/* CONTATO E LOCALIZAÇÃO */
+/* CONTATO */
 
 .contact-section {
   background: var(--light-blue);
@@ -524,7 +524,7 @@ section {
   font-size: 0.9rem;
 }
 
-/* BOTÃO FLUTUANTE DO WHATSAPP */
+/* WHATSAPP FLUTUANTE */
 
 .whatsapp-float {
   position: fixed;
@@ -550,7 +550,7 @@ section {
   transform: scale(1.08);
 }
 
-/* MENU MOBILE */
+/* RESPONSIVIDADE */
 
 @media (max-width: 850px) {
   .nav {
