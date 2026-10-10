@@ -12,7 +12,6 @@
   --muted: #6e8598;
   --white: #ffffff;
   --light-blue: #effcff;
-  --background-blue: #8bb8f4;
   --radius: 25px;
   --shadow: 0 14px 38px rgba(20, 61, 96, 0.11);
 }
@@ -32,7 +31,7 @@ html {
 
 body {
   font-family: "Poppins", Arial, sans-serif;
-  background: var(--background-blue);
+  background: #ffffff;
   color: var(--text);
   line-height: 1.6;
 }
@@ -171,7 +170,7 @@ section {
 }
 
 .section-heading p {
-  color: #294e70;
+  color: var(--muted);
   font-size: 1rem;
 }
 
@@ -179,7 +178,7 @@ section {
   display: inline-block;
   margin-bottom: 12px;
   padding: 7px 15px;
-  background: #ffffff;
+  background: var(--light-blue);
   color: var(--blue-dark);
   border-radius: 50px;
   font-size: 0.8rem;
@@ -188,7 +187,7 @@ section {
   text-transform: uppercase;
 }
 
-/* DESTAQUE PRINCIPAL - SUA FOTO */
+/* DESTAQUE PRINCIPAL - FOTO PERSONALIZADA */
 
 .hero {
   position: relative;
@@ -251,7 +250,7 @@ section {
 /* APRESENTAÇÃO */
 
 .intro {
-  background: var(--background-blue);
+  background: #ffffff;
 }
 
 .intro-grid {
@@ -283,7 +282,7 @@ section {
 
 .intro-content p {
   margin-bottom: 16px;
-  color: #244b70;
+  color: var(--muted);
 }
 
 .intro-content .button {
@@ -293,7 +292,7 @@ section {
 /* ATRAÇÕES */
 
 .attractions {
-  background: var(--background-blue);
+  background: var(--light-blue);
 }
 
 .cards-grid {
@@ -338,7 +337,7 @@ section {
 /* GALERIA */
 
 .gallery-section {
-  background: var(--background-blue);
+  background: #ffffff;
 }
 
 .gallery-grid {
@@ -369,7 +368,7 @@ section {
 /* EVENTOS E AVISOS */
 
 .events-section {
-  background: var(--background-blue);
+  background: var(--light-blue);
 }
 
 .announcement-card {
@@ -432,7 +431,7 @@ section {
 /* CONTATO E LOCALIZAÇÃO */
 
 .contact-section {
-  background: var(--background-blue);
+  background: var(--light-blue);
 }
 
 .contact-grid {
