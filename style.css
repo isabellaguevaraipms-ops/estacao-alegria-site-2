@@ -165,6 +165,7 @@ button {
   align-items: center;
   min-height: 600px;
   overflow: hidden;
+  padding-left: 60px;
   background:
     linear-gradient(
       90deg,
