@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ==========================================
 
   const SUPABASE_URL = "https://ggxhghszthcgnkecoiir.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxqGQ";
+  const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
 
   let supabaseClient = null;
 
