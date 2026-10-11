@@ -1,187 +1,453 @@
-```html
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#08a9d6">
-  <meta name="description" content="Conheça a Estação Alegria, clube de lazer familiar em Monte Mor, SP. Confira fotos, eventos e promoções.">
+```javascript
+// ============================================
+// ESTAÇÃO ALEGRIA — SITE PÚBLICO
+// ============================================
 
-  <title>Estação Alegria | Diversão para toda a família</title>
+const SUPABASE_URL = "https://ggxhghszthcgnkecoiir.supabase.co";
+const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
+const MEDIA_BUCKET = "foto";
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900;1000&display=swap" rel="stylesheet">
+let supabaseClient = null;
 
-  <link rel="stylesheet" href="style.css">
-</head>
+// ============================================
+// INICIALIZAÇÃO
+// ============================================
 
-<body>
-  <header class="header">
-    <a class="logo" href="#inicio" aria-label="Estação Alegria - início">
-      <span class="sun">☀</span>
-      <span>Estação <strong>Alegria</strong></span>
-    </a>
+document.addEventListener("DOMContentLoaded", () => {
+  if (!window.supabase?.createClient) {
+    console.error("Biblioteca Supabase não carregada.");
+    mostrarErroGeral("Não foi possível conectar ao sistema.");
+    return;
+  }
 
-    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navigation">☰</button>
+  supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-    <nav id="navigation" aria-label="Menu principal">
-      <a class="active" href="#inicio">Início</a>
-      <a href="#clube">O clube</a>
-      <a href="#fotos">Fotos</a>
-      <a href="#eventos">Eventos</a>
-      <a href="#promocoes">Promoções</a>
-      <a href="#contato">Contato</a>
-    </nav>
+  configurarMenu();
 
-    <a class="btn pink header-whatsapp" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">
-      ◎ Instagram
-    </a>
-  </header>
+  const ano = document.getElementById("currentYear");
+  if (ano) ano.textContent = new Date().getFullYear();
 
-  <main>
-    <section class="hero" id="inicio">
-      <div class="hero-content">
-        <span class="hero-label">☀ SOL, ÁGUA E ALEGRIA!</span>
-        <h1>Seu próximo dia de diversão começa aqui!</h1>
-        <p>Piscinas, brincadeiras e momentos especiais para curtir com toda a família.</p>
+  // Cada seção carrega separadamente.
+  carregarGaleria();
+  carregarEventos();
+  carregarPromocoes();
+  carregarAvisos();
+});
 
-        <div class="actions">
-          <a class="btn green" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Conheça nosso Instagram</a>
-          <a class="btn yellow" href="#fotos">Veja nossas fotos ↓</a>
-        </div>
+// ============================================
+// ELEMENTOS E MENSAGENS
+// ============================================
 
-        <div class="hero-note"><span>🌴</span> Seu lugar para relaxar e se divertir!</div>
-      </div>
+function encontrarElemento(ids) {
+  for (const id of ids) {
+    const elemento = document.getElementById(id);
+    if (elemento) return elemento;
+  }
+  return null;
+}
 
-      <div class="hero-sticker sticker-sun" aria-hidden="true">☀️</div>
-      <div class="hero-sticker sticker-duck" aria-hidden="true">🦆</div>
-    </section>
+function mostrarErroGeral(mensagem) {
+  const galeria = encontrarElemento([
+    "photoGallery",
+    "photo-gallery",
+    "galeria"
+  ]);
 
-    <div class="color-strip" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
+  if (galeria) galeria.textContent = mensagem;
+}
 
-    <section class="section intro" id="clube">
-      <span class="eyebrow">💙 PRAZER, SOMOS A ESTAÇÃO ALEGRIA</span>
-      <h2>Um clube de lazer feito para <span>viver bons momentos!</span></h2>
-      <p>
-        A Estação Alegria é um espaço de lazer familiar em Monte Mor, São Paulo.
-        Um lugar para aproveitar o dia, reunir pessoas especiais e criar lembranças inesquecíveis.
-      </p>
-    </section>
+function criarMensagem(texto) {
+  const p = document.createElement("p");
+  p.textContent = texto;
+  return p;
+}
 
-    <!-- GALERIA -->
-    <section class="section gallery-section" id="fotos">
-      <div class="section-heading">
-        <span class="eyebrow">📸 REGISTRE A ALEGRIA</span>
-        <h2>Um pouquinho desse <span>clima de verão!</span></h2>
-        <p>Confira as fotos publicadas pela Estação Alegria.</p>
-      </div>
+// ============================================
+// MENU RESPONSIVO
+// ============================================
 
-      <div id="photoGallery" class="gallery-grid" aria-live="polite">
-        <p>Carregando fotos...</p>
-      </div>
+function configurarMenu() {
+  const botao = document.getElementById("menuToggle");
+  const navegacao = document.getElementById("navigation");
 
-      <a class="btn blue" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Visitar Instagram oficial</a>
-    </section>
+  if (!botao || !navegacao) return;
 
-    <!-- EVENTOS -->
-    <section class="section events-section" id="eventos">
-      <div class="section-heading">
-        <span class="eyebrow">📅 FIQUE POR DENTRO</span>
-        <h2>Eventos e <span>novidades</span></h2>
-        <p>Confira os próximos eventos e atividades da Estação Alegria.</p>
-      </div>
+  botao.addEventListener("click", () => {
+    const aberto = navegacao.classList.toggle("active");
+    botao.setAttribute("aria-expanded", String(aberto));
+  });
 
-      <div id="eventList" class="card-grid" aria-live="polite">
-        <p>Carregando os próximos eventos...</p>
-      </div>
+  navegacao.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      navegacao.classList.remove("active");
+      botao.setAttribute("aria-expanded", "false");
+    });
+  });
+}
 
-      <div id="noticeList" class="notices-list" aria-live="polite"></div>
-    </section>
+// ============================================
+// GALERIA DE FOTOS E VÍDEOS
+// ============================================
 
-    <!-- PROMOÇÕES -->
-    <section class="section promotions-section" id="promocoes">
-      <div class="promotion-content">
-        <span class="eyebrow">🎁 APROVEITE</span>
-        <h2>Seu próximo dia feliz pode começar agora!</h2>
-        <p>Confira as promoções e novidades da Estação Alegria. Consulte o clube para confirmar as condições de cada oferta.</p>
+async function carregarGaleria() {
+  const galeria = encontrarElemento([
+    "photoGallery",
+    "photo-gallery",
+    "galeria"
+  ]);
 
-        <a class="btn yellow" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Ver Instagram oficial</a>
-      </div>
+  if (!galeria) {
+    console.error(
+      'Galeria não encontrada. Confira o ID no HTML.'
+    );
+    return;
+  }
 
-      <div class="promotion-decoration" aria-hidden="true">🌴☀️🍉</div>
+  galeria.textContent = "Carregando fotos...";
 
-      <div id="promotionList" class="card-grid" aria-live="polite">
-        <p>Carregando as promoções...</p>
-      </div>
-    </section>
+  let temporizador;
 
-    <!-- CONTATO -->
-    <section class="section contact-section" id="contato">
-      <div class="section-heading">
-        <span class="eyebrow">📍 ESTAMOS TE ESPERANDO</span>
-        <h2>Venha conhecer a <span>Estação Alegria!</span></h2>
-        <p>Consulte os horários antes da visita para planejar seu passeio.</p>
-      </div>
+  try {
+    if (!supabaseClient) {
+      throw new Error("Cliente Supabase não inicializado.");
+    }
 
-      <div class="contact-grid">
-        <iframe
-          title="Mapa da localização da Estação Alegria"
-          src="https://maps.google.com/maps?q=Rua%20Dez%20312%20Recanto%20das%20Orquideas%20Monte%20Mor%20SP&z=15&output=embed"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
+    // Evita aguardar indefinidamente pela consulta.
+    const consulta = supabaseClient
+      .from("fotos")
+      .select("id, nome, imagem_url, storage_path, created_at")
+      .order("created_at", { ascending: false });
 
-        <div class="contact-card">
-          <div class="contact-item">
-            <span class="contact-icon">📍</span>
-            <div>
-              <h3>Nosso endereço</h3>
-              <p>Rua Dez, nº 312, Recanto das Orquídeas, Monte Mor – SP, CEP 13190-000.</p>
-            </div>
-          </div>
+    const resultado = await Promise.race([
+      consulta,
+      new Promise((resolve) => {
+        temporizador = setTimeout(() => {
+          resolve({
+            data: null,
+            error: new Error("Tempo limite ao consultar a galeria.")
+          });
+        }, 10000);
+      })
+    ]);
 
-          <div class="contact-item">
-            <span class="contact-icon">🕒</span>
-            <div>
-              <h3>Horário de funcionamento</h3>
-              <p>Consulte os horários atualizados diretamente com o clube.</p>
-            </div>
-          </div>
+    if (resultado.error) throw resultado.error;
 
-          <a class="btn blue full-width" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Acesse nosso Instagram</a>
-          <a class="btn blue full-width" href="https://maps.google.com/?q=Rua+Dez+312+Monte+Mor+SP" target="_blank" rel="noopener noreferrer">Abrir no Google Maps ↗</a>
-        </div>
-      </div>
-    </section>
-  </main>
+    const fotos = resultado.data || [];
+    galeria.replaceChildren();
 
-  <footer class="footer">
-    <a class="logo footer-logo" href="#inicio">
-      <span class="sun">☀</span>
-      <span>Estação <strong>Alegria</strong></span>
-    </a>
+    if (fotos.length === 0) {
+      galeria.appendChild(
+        criarMensagem("Nenhuma foto cadastrada na galeria.")
+      );
+      return;
+    }
 
-    <p>Mais sorrisos, mais sol e mais momentos especiais. 💙</p>
+    let exibidas = 0;
 
-    <div class="footer-links">
-      <a href="#clube">O clube</a>
-      <a href="#fotos">Fotos</a>
-      <a href="#eventos">Eventos</a>
-      <a href="#contato">Contato</a>
-      <a href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">Instagram</a>
-    </div>
+    fotos.forEach((foto) => {
+      let url = foto.imagem_url || "";
 
-    <small>© <span id="currentYear">2026</span> Estação Alegria. Todos os direitos reservados.</small>
-    <small class="footer-note">Informações sujeitas a confirmação pelo estabelecimento.</small>
-  </footer>
+      // Gera a URL usando o caminho do Storage, se necessário.
+      if (!url && foto.storage_path) {
+        const resultadoUrl = supabaseClient.storage
+          .from(MEDIA_BUCKET)
+          .getPublicUrl(foto.storage_path);
 
-  <a class="floating-whatsapp" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer" aria-label="Visite o Instagram da Estação Alegria">◎</a>
+        url = resultadoUrl.data?.publicUrl || "";
+      }
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js"></script>
-</body>
-</html>
+      if (!url) {
+        console.warn("Foto sem URL válida:", foto.id);
+        return;
+      }
+
+      const card = document.createElement("article");
+      card.className = "photo-card";
+
+      const caminho = (foto.storage_path || url)
+        .split("?")[0]
+        .toLowerCase();
+
+      const ehVideo = /\.(mp4|webm|mov|m4v|ogg)$/i.test(caminho);
+
+      const midia = document.createElement(ehVideo ? "video" : "img");
+
+      midia.src = url;
+      midia.className = "gallery-media";
+
+      if (ehVideo) {
+        midia.controls = true;
+        midia.playsInline = true;
+        midia.preload = "metadata";
+      } else {
+        midia.alt = foto.nome || "Estação Alegria";
+        midia.loading = "lazy";
+      }
+
+      midia.onerror = () => {
+        console.error("Não foi possível carregar a mídia:", url);
+
+        const aviso = criarMensagem(
+          "Arquivo indisponível. Verifique as permissões do Storage."
+        );
+
+        card.replaceChildren(aviso);
+      };
+
+      const legenda = document.createElement("p");
+      legenda.className = "photo-caption";
+      legenda.textContent = foto.nome || "Estação Alegria";
+
+      card.appendChild(midia);
+      card.appendChild(legenda);
+      galeria.appendChild(card);
+
+      exibidas++;
+    });
+
+    if (exibidas === 0) {
+      galeria.replaceChildren(
+        criarMensagem(
+          "Nenhum arquivo possui uma URL válida para exibição."
+        )
+      );
+    }
+  } catch (erro) {
+    console.error("Erro ao carregar a galeria:", erro);
+
+    galeria.replaceChildren(
+      criarMensagem(
+        erro.message === "Tempo limite ao consultar a galeria."
+          ? "A consulta demorou demais. Verifique a conexão e as permissões do Supabase."
+          : "Erro ao consultar as fotos. Verifique a tabela fotos e suas permissões."
+      )
+    );
+  } finally {
+    clearTimeout(temporizador);
+  }
+}
+
+// ============================================
+// EVENTOS
+// ============================================
+
+async function carregarEventos() {
+  const container = encontrarElemento([
+    "eventsContainer",
+    "eventosContainer",
+    "eventos"
+  ]);
+
+  if (!container) return;
+
+  container.textContent = "Carregando eventos...";
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("eventos")
+      .select("id, titulo, descricao, data_evento, imagem_url, created_at")
+      .order("data_evento", { ascending: true });
+
+    if (error) throw error;
+
+    container.replaceChildren();
+
+    if (!data?.length) {
+      container.appendChild(criarMensagem("Nenhum evento anunciado."));
+      return;
+    }
+
+    data.forEach((evento) => {
+      const card = document.createElement("article");
+      card.className = "event-card";
+
+      const titulo = document.createElement("h3");
+      titulo.textContent = evento.titulo || "Evento";
+
+      const descricao = document.createElement("p");
+      descricao.textContent = evento.descricao || "";
+
+      card.appendChild(titulo);
+
+      if (evento.data_evento) {
+        const dataEvento = document.createElement("p");
+        dataEvento.textContent = formatarData(evento.data_evento);
+        card.appendChild(dataEvento);
+      }
+
+      card.appendChild(descricao);
+
+      if (evento.imagem_url) {
+        const img = document.createElement("img");
+        img.src = evento.imagem_url;
+        img.alt = evento.titulo || "Evento";
+        img.loading = "lazy";
+        img.onerror = () => img.remove();
+        card.appendChild(img);
+      }
+
+      container.appendChild(card);
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar eventos:", erro);
+    container.replaceChildren(
+      criarMensagem("Não foi possível carregar os eventos.")
+    );
+  }
+}
+
+// ============================================
+// PROMOÇÕES
+// ============================================
+
+async function carregarPromocoes() {
+  const container = encontrarElemento([
+    "promotionsContainer",
+    "promocoesContainer",
+    "promocoes"
+  ]);
+
+  if (!container) return;
+
+  container.textContent = "Carregando promoções...";
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("promocoes")
+      .select("id, titulo, descricao, validade, imagem_url, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    container.replaceChildren();
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const validas = (data || []).filter((promocao) => {
+      if (!promocao.validade) return true;
+
+      const validade = new Date(`${promocao.validade}T23:59:59`);
+
+      return !Number.isNaN(validade.getTime()) && validade >= hoje;
+    });
+
+    if (!validas.length) {
+      container.appendChild(
+        criarMensagem("Nenhuma promoção disponível no momento.")
+      );
+      return;
+    }
+
+    validas.forEach((promocao) => {
+      const card = document.createElement("article");
+      card.className = "promotion-card";
+
+      const titulo = document.createElement("h3");
+      titulo.textContent = promocao.titulo || "Promoção";
+
+      const descricao = document.createElement("p");
+      descricao.textContent = promocao.descricao || "";
+
+      card.appendChild(titulo);
+      card.appendChild(descricao);
+
+      if (promocao.validade) {
+        const validade = document.createElement("p");
+        validade.textContent =
+          `Válida até ${formatarData(promocao.validade)}`;
+        card.appendChild(validade);
+      }
+
+      if (promocao.imagem_url) {
+        const img = document.createElement("img");
+        img.src = promocao.imagem_url;
+        img.alt = promocao.titulo || "Promoção";
+        img.loading = "lazy";
+        img.onerror = () => img.remove();
+        card.appendChild(img);
+      }
+
+      container.appendChild(card);
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar promoções:", erro);
+    container.replaceChildren(
+      criarMensagem("Não foi possível carregar as promoções.")
+    );
+  }
+}
+
+// ============================================
+// AVISOS
+// ============================================
+
+async function carregarAvisos() {
+  const container = encontrarElemento([
+    "noticesContainer",
+    "avisosContainer",
+    "avisos"
+  ]);
+
+  if (!container) return;
+
+  container.textContent = "Carregando avisos...";
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("avisos")
+      .select("id, titulo, descricao, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    container.replaceChildren();
+
+    if (!data?.length) {
+      container.appendChild(criarMensagem("Nenhum aviso no momento."));
+      return;
+    }
+
+    data.forEach((aviso) => {
+      const card = document.createElement("article");
+      card.className = "notice-card";
+
+      const titulo = document.createElement("h3");
+      titulo.textContent = aviso.titulo || "Aviso";
+
+      const descricao = document.createElement("p");
+      descricao.textContent = aviso.descricao || "";
+
+      card.appendChild(titulo);
+      card.appendChild(descricao);
+      container.appendChild(card);
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar avisos:", erro);
+    container.replaceChildren(
+      criarMensagem("Não foi possível carregar os avisos.")
+    );
+  }
+}
+
+// ============================================
+// FORMATAÇÃO DE DATA
+// ============================================
+
+function formatarData(valor) {
+  if (!valor) return "";
+
+  const data = new Date(valor);
+
+  if (Number.isNaN(data.getTime())) return valor;
+
+  return data.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
 ```
