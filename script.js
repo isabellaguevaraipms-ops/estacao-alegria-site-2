@@ -11,7 +11,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     if (window.supabase?.createClient) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
     } else {
       console.error("A biblioteca do Supabase não foi carregada.");
     }
@@ -28,13 +31,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   const navLinks = document.querySelectorAll("#navigation a");
   const currentYear = document.getElementById("currentYear");
 
-  if (currentYear) currentYear.textContent = new Date().getFullYear();
+  if (currentYear) {
+    currentYear.textContent = new Date().getFullYear();
+  }
 
   if (menuToggle && navigation) {
     menuToggle.addEventListener("click", () => {
       const isOpen = navigation.classList.toggle("open");
+
       menuToggle.setAttribute("aria-expanded", String(isOpen));
-      menuToggle.setAttribute("aria-label", isOpen ? "Fechar menu" : "Abrir menu");
+      menuToggle.setAttribute(
+        "aria-label",
+        isOpen ? "Fechar menu" : "Abrir menu"
+      );
       menuToggle.textContent = isOpen ? "✕" : "☰";
     });
 
@@ -45,7 +54,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       menuToggle.textContent = "☰";
     };
 
-    navLinks.forEach(link => link.addEventListener("click", closeMenu));
+    navLinks.forEach(link => {
+      link.addEventListener("click", closeMenu);
+    });
 
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") closeMenu();
@@ -69,8 +80,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function criarElemento(tag, classe, texto) {
     const elemento = document.createElement(tag);
+
     if (classe) elemento.className = classe;
     if (texto !== undefined) elemento.textContent = texto;
+
     return elemento;
   }
 
@@ -78,6 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!data) return "";
 
     const dataValida = new Date(`${data}T12:00:00`);
+
     if (Number.isNaN(dataValida.getTime())) return "";
 
     return dataValida.toLocaleDateString("pt-BR");
@@ -85,7 +99,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function mostrarMensagem(container, mensagem) {
     if (!container) return;
-    container.replaceChildren(criarElemento("p", "empty-message", mensagem));
+
+    container.replaceChildren(
+      criarElemento("p", "empty-message", mensagem)
+    );
   }
 
   function obterExtensao(valor) {
@@ -96,21 +113,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       const caminho = decodeURIComponent(url.pathname);
       const nome = caminho.split("/").pop() || "";
       const ponto = nome.lastIndexOf(".");
-      return ponto >= 0 ? nome.slice(ponto + 1).toLowerCase() : "";
+
+      return ponto >= 0
+        ? nome.slice(ponto + 1).toLowerCase()
+        : "";
     } catch {
       const nome = valor.split("?")[0].split("#")[0];
       const ponto = nome.lastIndexOf(".");
-      return ponto >= 0 ? nome.slice(ponto + 1).toLowerCase() : "";
+
+      return ponto >= 0
+        ? nome.slice(ponto + 1).toLowerCase()
+        : "";
     }
   }
 
   function ehVideo(item) {
-    const extensoesVideo = ["mp4", "webm", "mov", "m4v", "ogv", "ogg"];
-    const mime = (item?.mime_type || item?.tipo || "").toLowerCase();
+    const extensoesVideo = [
+      "mp4", "webm", "mov", "m4v", "ogv", "ogg"
+    ];
+
+    const mime = (
+      item?.mime_type || item?.tipo || ""
+    ).toLowerCase();
 
     if (mime.startsWith("video/")) return true;
 
     const arquivo = item?.storage_path || item?.imagem_url || "";
+
     return extensoesVideo.includes(obterExtensao(arquivo));
   }
 
@@ -120,7 +149,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const titulo = item?.nome || "Conteúdo da Estação Alegria";
 
     if (!url) {
-      return criarElemento("p", "media-error", "Este conteúdo não possui uma URL disponível.");
+      return criarElemento(
+        "p",
+        "media-error",
+        "Este conteúdo não possui uma URL disponível."
+      );
     }
 
     let midia;
@@ -131,7 +164,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       midia.playsInline = true;
       midia.preload = "metadata";
       midia.setAttribute("aria-label", titulo);
-      midia.muted = false;
 
       const extensao = obterExtensao(item.storage_path || url);
 
@@ -147,7 +179,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       midia.addEventListener("error", () => {
         console.error("Falha ao carregar vídeo:", url);
-        midia.replaceWith(criarElemento("p", "media-error", "Não foi possível carregar este vídeo. Verifique o arquivo e o acesso no Supabase."));
+
+        midia.replaceWith(
+          criarElemento(
+            "p",
+            "media-error",
+            "Não foi possível carregar este vídeo. Verifique o arquivo e o acesso no Supabase."
+          )
+        );
       }, { once: true });
     } else {
       midia = document.createElement("img");
@@ -158,12 +197,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       midia.addEventListener("error", () => {
         console.error("Falha ao carregar imagem:", url);
-        midia.replaceWith(criarElemento("p", "media-error", "Não foi possível carregar esta imagem."));
+
+        midia.replaceWith(
+          criarElemento(
+            "p",
+            "media-error",
+            "Não foi possível carregar esta imagem."
+          )
+        );
       }, { once: true });
     }
 
     midia.classList.add("gallery-media");
-    if (opcoes.destaque) midia.classList.add("gallery-media-featured");
+
+    if (opcoes.destaque) {
+      midia.classList.add("gallery-media-featured");
+    }
 
     return midia;
   }
@@ -176,28 +225,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     const artigo = criarElemento("article", "feature-card");
 
     if (imagem) {
-      artigo.appendChild(criarMidia({
-        nome: titulo,
-        imagem_url: imagem,
-        storage_path: imagem
-      }));
+      artigo.appendChild(
+        criarMidia({
+          nome: titulo,
+          imagem_url: imagem,
+          storage_path: imagem
+        })
+      );
     }
 
     const conteudo = criarElemento("div", "card-content");
-    conteudo.appendChild(criarElemento("span", "card-emoji", tipo === "evento" ? "📅" : "🎁"));
-    conteudo.appendChild(criarElemento("h3", "", titulo || "Novidade"));
+
+    conteudo.appendChild(
+      criarElemento(
+        "span",
+        "card-emoji",
+        tipo === "evento" ? "📅" : "🎁"
+      )
+    );
+
+    conteudo.appendChild(
+      criarElemento("h3", "", titulo || "Novidade")
+    );
 
     if (data) {
-      conteudo.appendChild(criarElemento(
-        "p",
-        "item-date",
-        `${tipo === "evento" ? "Data do evento" : "Válido até"}: ${formatarData(data)}`
-      ));
+      conteudo.appendChild(
+        criarElemento(
+          "p",
+          "item-date",
+          `${tipo === "evento" ? "Data do evento" : "Válido até"}: ${formatarData(data)}`
+        )
+      );
     }
 
-    if (descricao) conteudo.appendChild(criarElemento("p", "", descricao));
+    if (descricao) {
+      conteudo.appendChild(criarElemento("p", "", descricao));
+    }
 
     artigo.appendChild(conteudo);
+
     return artigo;
   }
 
@@ -207,6 +273,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function carregarEventos() {
     const container = document.getElementById("eventList");
+
     if (!container) return;
 
     if (!supabaseClient) {
@@ -217,7 +284,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { data, error } = await supabaseClient
       .from("eventos")
       .select("id, titulo, descricao, data_evento, imagem_url, created_at")
-      .order("data_evento", { ascending: true, nullsFirst: false });
+      .order("data_evento", {
+        ascending: true,
+        nullsFirst: false
+      });
 
     if (error) {
       console.error("Erro ao carregar eventos:", error);
@@ -228,14 +298,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     container.replaceChildren();
 
     if (!data?.length) {
-      mostrarMensagem(container, "Ainda não há eventos publicados. Fique de olho nas novidades!");
+      mostrarMensagem(
+        container,
+        "Ainda não há eventos publicados. Fique de olho nas novidades!"
+      );
       return;
     }
 
     data.forEach(evento => {
-      container.appendChild(criarCartao(
-        evento.titulo, evento.descricao, evento.data_evento, evento.imagem_url, "evento"
-      ));
+      container.appendChild(
+        criarCartao(
+          evento.titulo,
+          evento.descricao,
+          evento.data_evento,
+          evento.imagem_url,
+          "evento"
+        )
+      );
     });
   }
 
@@ -245,6 +324,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function carregarPromocoes() {
     const container = document.getElementById("promotionList");
+
     if (!container) return;
 
     if (!supabaseClient) {
@@ -270,8 +350,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const ativas = (data || []).filter(promocao => {
       if (!promocao.validade) return true;
+
       const validade = new Date(`${promocao.validade}T23:59:59`);
-      return !Number.isNaN(validade.getTime()) && validade >= hoje;
+
+      return (
+        !Number.isNaN(validade.getTime()) &&
+        validade >= hoje
+      );
     });
 
     if (!ativas.length) {
@@ -280,9 +365,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     ativas.forEach(promocao => {
-      container.appendChild(criarCartao(
-        promocao.titulo, promocao.descricao, promocao.validade, promocao.imagem_url, "promocao"
-      ));
+      container.appendChild(
+        criarCartao(
+          promocao.titulo,
+          promocao.descricao,
+          promocao.validade,
+          promocao.imagem_url,
+          "promocao"
+        )
+      );
     });
   }
 
@@ -292,6 +383,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function carregarAvisos() {
     const container = document.getElementById("noticeList");
+
     if (!container) return;
 
     if (!supabaseClient) {
@@ -322,10 +414,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       const icone = criarElemento("div", "announcement-icon", "📢");
       const conteudo = criarElemento("div");
 
-      conteudo.appendChild(criarElemento("h3", "", aviso.titulo || "Aviso"));
+      conteudo.appendChild(
+        criarElemento("h3", "", aviso.titulo || "Aviso")
+      );
 
       if (aviso.descricao) {
-        conteudo.appendChild(criarElemento("p", "", aviso.descricao));
+        conteudo.appendChild(
+          criarElemento("p", "", aviso.descricao)
+        );
       }
 
       cartao.append(icone, conteudo);
@@ -339,6 +435,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function carregarGaleria() {
     const galeria = document.getElementById("photoGallery");
+
     if (!galeria) return;
 
     if (!supabaseClient) {
@@ -353,7 +450,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (error) {
       console.error("Erro ao carregar a galeria:", error);
-      mostrarMensagem(galeria, "Não foi possível carregar a galeria. Tente novamente mais tarde.");
+
+      mostrarMensagem(
+        galeria,
+        "Não foi possível carregar a galeria. Tente novamente mais tarde."
+      );
+
       return;
     }
 
@@ -372,20 +474,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const card = criarElemento(
         "article",
-        ehVideo(item) ? "gallery-item gallery-item-video" : "gallery-item"
+        ehVideo(item)
+          ? "gallery-item gallery-item-video"
+          : "gallery-item"
       );
 
       card.appendChild(criarMidia(item));
 
       if (item.nome) {
-        card.appendChild(criarElemento("p", "gallery-caption", item.nome));
+        card.appendChild(
+          criarElemento("p", "gallery-caption", item.nome)
+        );
       }
 
       galeria.appendChild(card);
     });
 
     if (!galeria.children.length) {
-      mostrarMensagem(galeria, "Nenhum arquivo válido foi encontrado na galeria.");
+      mostrarMensagem(
+        galeria,
+        "Nenhum arquivo válido foi encontrado na galeria."
+      );
     }
   }
 
@@ -399,9 +508,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const quantidadeEl = document.getElementById("ratingCount");
 
     if (!lista || !supabaseClient) {
-      if (lista) mostrarMensagem(lista, "Não foi possível carregar as avaliações.");
+      if (lista) {
+        mostrarMensagem(lista, "Não foi possível carregar as avaliações.");
+      }
+
       if (mediaEl) mediaEl.textContent = "Indisponível";
       if (quantidadeEl) quantidadeEl.textContent = "";
+
       return;
     }
 
@@ -413,9 +526,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (error) {
       console.error("Erro ao carregar avaliações:", error);
+
       mostrarMensagem(lista, "Não foi possível carregar as avaliações.");
+
       if (mediaEl) mediaEl.textContent = "Indisponível";
       if (quantidadeEl) quantidadeEl.textContent = "";
+
       return;
     }
 
@@ -446,7 +562,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (!quantidade) {
-      mostrarMensagem(lista, "Seja a primeira pessoa a avaliar a Estação Alegria!");
+      mostrarMensagem(
+        lista,
+        "Seja a primeira pessoa a avaliar a Estação Alegria!"
+      );
       return;
     }
 
@@ -456,10 +575,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       const estrelas = criarElemento(
         "div",
         "review-stars",
-        "★".repeat(avaliacao.nota) + "☆".repeat(5 - avaliacao.nota)
+        "★".repeat(avaliacao.nota) +
+        "☆".repeat(5 - avaliacao.nota)
       );
 
-      estrelas.setAttribute("aria-label", `${avaliacao.nota} de 5 estrelas`);
+      estrelas.setAttribute(
+        "aria-label",
+        `${avaliacao.nota} de 5 estrelas`
+      );
 
       const nome = criarElemento(
         "h3",
@@ -467,7 +590,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         avaliacao.nome_publico?.trim() || "Visitante"
       );
 
-      const comentario = criarElemento("p", "", avaliacao.comentario || "");
+      const comentario = criarElemento(
+        "p",
+        "",
+        avaliacao.comentario || ""
+      );
 
       card.append(estrelas, nome, comentario);
 
@@ -475,7 +602,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         const data = new Date(avaliacao.created_at);
 
         if (!Number.isNaN(data.getTime())) {
-          card.appendChild(criarElemento("small", "", data.toLocaleDateString("pt-BR")));
+          card.appendChild(
+            criarElemento(
+              "small",
+              "",
+              data.toLocaleDateString("pt-BR")
+            )
+          );
         }
       }
 
@@ -497,11 +630,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const botaoEnviar = document.getElementById("submitReview");
     const mensagem = document.getElementById("reviewMessage");
 
-    if (!formulario || !seletor || !campoNota || !mensagem || !botaoEnviar) return;
+    if (
+      !formulario ||
+      !seletor ||
+      !campoNota ||
+      !mensagem ||
+      !botaoEnviar
+    ) {
+      console.error("Não foi possível localizar todos os campos do formulário.");
+      return;
+    }
 
     function atualizarEstrelas(nota) {
       seletor.querySelectorAll("[data-rating]").forEach(botao => {
         const valor = Number(botao.dataset.rating);
+
         botao.classList.toggle("selected", valor <= nota);
         botao.setAttribute("aria-pressed", String(valor === nota));
       });
@@ -519,13 +662,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       evento.preventDefault();
 
       if (campoWebsite?.value.trim()) {
-        // Não informa ao robô se o envio foi detectado.
         mensagem.textContent = "Não foi possível processar o envio.";
         return;
       }
 
       if (!supabaseClient) {
-        mensagem.textContent = "Não foi possível conectar. Tente novamente mais tarde.";
+        console.error("Cliente Supabase indisponível.");
+
+        mensagem.textContent =
+          "Não foi possível conectar ao serviço de avaliações.";
+
         return;
       }
 
@@ -534,18 +680,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       const comentario = campoComentario?.value.trim() || "";
 
       if (!Number.isInteger(nota) || nota < 1 || nota > 5) {
-        mensagem.textContent = "Escolha de 1 a 5 estrelas antes de enviar.";
+        mensagem.textContent =
+          "Escolha de 1 a 5 estrelas antes de enviar.";
         return;
       }
 
       if (!comentario) {
-        mensagem.textContent = "Escreva um comentário antes de enviar.";
+        mensagem.textContent =
+          "Escreva um comentário antes de enviar.";
+
         campoComentario?.focus();
         return;
       }
 
       if (comentario.length > 1000 || (nome && nome.length > 60)) {
-        mensagem.textContent = "Confira o tamanho do nome e do comentário.";
+        mensagem.textContent =
+          "Confira o tamanho do nome e do comentário.";
         return;
       }
 
@@ -553,16 +703,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       mensagem.textContent = "Enviando sua avaliação...";
 
       try {
-        const { error } = await supabaseClient
+        const { data, error } = await supabaseClient
           .from("avaliacoes")
           .insert({
-            nota,
-            comentario,
+            nota: nota,
+            comentario: comentario,
             nome_publico: nome,
             status: "pendente"
+          })
+          .select("id")
+          .single();
+
+        if (error) {
+          console.error("Erro retornado pelo Supabase:", {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
           });
 
-        if (error) throw error;
+          throw error;
+        }
+
+        console.log("Avaliação enviada com sucesso:", data?.id);
 
         mensagem.textContent =
           "Obrigado! Sua avaliação foi enviada e aguarda aprovação.";
@@ -570,7 +733,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         formulario.reset();
         atualizarEstrelas(0);
       } catch (error) {
-        console.error("Erro ao enviar avaliação:", error);
+        console.error("Falha no envio da avaliação:", error);
+
+        // Detalhes técnicos ficam no Console para diagnóstico.
         mensagem.textContent =
           "Não foi possível enviar. Verifique sua conexão e tente novamente.";
       } finally {
