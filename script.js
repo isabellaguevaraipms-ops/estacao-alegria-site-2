@@ -492,3 +492,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     carregarGaleria()
   ]);
 });
+// Alternância entre modo claro e noturno
+(() => {
+  const botaoTema = document.getElementById("themeToggle");
+
+  if (!botaoTema) return;
+
+  function aplicarTema(escuro) {
+    document.body.classList.toggle("dark-mode", escuro);
+
+    botaoTema.textContent = escuro ? "☀️" : "🌙";
+
+    botaoTema.setAttribute(
+      "aria-label",
+      escuro ? "Ativar modo claro" : "Ativar modo noturno"
+    );
+  }
+
+  let temaSalvo = null;
+
+  try {
+    temaSalvo = localStorage.getItem("estacaoAlegriaTema");
+  } catch (erro) {
+    // O site continua funcionando mesmo se o armazenamento estiver bloqueado.
+  }
+
+  aplicarTema(temaSalvo === "escuro");
+
+  botaoTema.addEventListener("click", () => {
+    const escuro = !document.body.classList.contains("dark-mode");
+
+    aplicarTema(escuro);
+
+    try {
+      localStorage.setItem(
+        "estacaoAlegriaTema",
+        escuro ? "escuro" : "claro"
+      );
+    } catch (erro) {
+      // A troca de tema continua funcionando nesta visita.
+    }
+  });
+})();
