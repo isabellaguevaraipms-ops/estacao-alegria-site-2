@@ -4,10 +4,7 @@
 // ============================================
 
 const SUPABASE_URL = "https://ggxhghszthcgnkecoiir.supabase.co";
-
-const SUPABASE_KEY =
-  "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
-
+const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
 const MEDIA_BUCKET = "foto";
 
 let supabaseClient = null;
@@ -16,9 +13,9 @@ let supabaseClient = null;
 // INICIALIZAÇÃO
 // ============================================
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   if (!window.supabase?.createClient) {
-    console.error("A biblioteca Supabase não foi carregada.");
+    console.error("Biblioteca Supabase não carregada.");
     mostrarErroGeral("Não foi possível conectar ao sistema.");
     return;
   }
@@ -31,16 +28,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   configurarMenu();
 
   const ano = document.getElementById("currentYear");
-  if (ano) {
-    ano.textContent = new Date().getFullYear();
-  }
+  if (ano) ano.textContent = new Date().getFullYear();
 
-  await Promise.allSettled([
-    carregarGaleria(),
-    carregarEventos(),
-    carregarPromocoes(),
-    carregarAvisos()
-  ]);
+  // Cada seção carrega separadamente.
+  carregarGaleria();
+  carregarEventos();
+  carregarPromocoes();
+  carregarAvisos();
 });
 
 // ============================================
@@ -52,7 +46,6 @@ function encontrarElemento(ids) {
     const elemento = document.getElementById(id);
     if (elemento) return elemento;
   }
-
   return null;
 }
 
@@ -63,9 +56,7 @@ function mostrarErroGeral(mensagem) {
     "galeria"
   ]);
 
-  if (galeria) {
-    galeria.textContent = mensagem;
-  }
+  if (galeria) galeria.textContent = mensagem;
 }
 
 function criarMensagem(texto) {
@@ -86,7 +77,6 @@ function configurarMenu() {
 
   botao.addEventListener("click", () => {
     const aberto = navegacao.classList.toggle("active");
-
     botao.setAttribute("aria-expanded", String(aberto));
   });
 
@@ -111,81 +101,97 @@ async function carregarGaleria() {
 
   if (!galeria) {
     console.error(
-      'Galeria não encontrada. Confira o ID do elemento no HTML.'
+      'Galeria não encontrada. Confira o ID no HTML.'
     );
     return;
   }
 
-  galeria.replaceChildren();
-  galeria.appendChild(criarMensagem("Carregando fotos e vídeos..."));
+  galeria.textContent = "Carregando fotos...";
+
+  let temporizador;
 
   try {
-    const { data, error } = await supabaseClient
+    if (!supabaseClient) {
+      throw new Error("Cliente Supabase não inicializado.");
+    }
+
+    // Evita aguardar indefinidamente pela consulta.
+    const consulta = supabaseClient
       .from("fotos")
       .select("id, nome, imagem_url, storage_path, created_at")
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    const resultado = await Promise.race([
+      consulta,
+      new Promise((resolve) => {
+        temporizador = setTimeout(() => {
+          resolve({
+            data: null,
+            error: new Error("Tempo limite ao consultar a galeria.")
+          });
+        }, 10000);
+      })
+    ]);
 
+    if (resultado.error) throw resultado.error;
+
+    const fotos = resultado.data || [];
     galeria.replaceChildren();
 
-    if (!data || data.length === 0) {
+    if (fotos.length === 0) {
       galeria.appendChild(
-        criarMensagem("Ainda não há fotos ou vídeos na galeria.")
+        criarMensagem("Nenhuma foto cadastrada na galeria.")
       );
       return;
     }
 
-    let quantidade = 0;
+    let exibidas = 0;
 
-    data.forEach((item) => {
-      let url = item.imagem_url;
+    fotos.forEach((foto) => {
+      let url = foto.imagem_url || "";
 
-      // Se não existir URL salva, tenta gerar pelo caminho do arquivo.
-      if (!url && item.storage_path) {
-        const resultado = supabaseClient.storage
+      // Gera a URL usando o caminho do Storage, se necessário.
+      if (!url && foto.storage_path) {
+        const resultadoUrl = supabaseClient.storage
           .from(MEDIA_BUCKET)
-          .getPublicUrl(item.storage_path);
+          .getPublicUrl(foto.storage_path);
 
-        url = resultado.data?.publicUrl || "";
+        url = resultadoUrl.data?.publicUrl || "";
       }
 
       if (!url) {
-        console.warn("Registro sem URL ou caminho de arquivo:", item.id);
+        console.warn("Foto sem URL válida:", foto.id);
         return;
       }
 
       const card = document.createElement("article");
       card.className = "photo-card";
 
-      const extensao = (item.storage_path || url)
+      const caminho = (foto.storage_path || url)
         .split("?")[0]
         .toLowerCase();
 
-      const ehVideo =
-        /\.(mp4|webm|mov|m4v|ogg)$/i.test(extensao);
+      const ehVideo = /\.(mp4|webm|mov|m4v|ogg)$/i.test(caminho);
 
-      let midia;
+      const midia = document.createElement(ehVideo ? "video" : "img");
+
+      midia.src = url;
+      midia.className = "gallery-media";
 
       if (ehVideo) {
-        midia = document.createElement("video");
         midia.controls = true;
         midia.playsInline = true;
         midia.preload = "metadata";
       } else {
-        midia = document.createElement("img");
-        midia.alt = item.nome || "Estação Alegria";
+        midia.alt = foto.nome || "Estação Alegria";
         midia.loading = "lazy";
       }
 
-      midia.classList.add("gallery-media");
-      midia.src = url;
-
       midia.onerror = () => {
-        console.error("Erro ao abrir arquivo da galeria:", url);
+        console.error("Não foi possível carregar a mídia:", url);
 
         const aviso = criarMensagem(
-          "Não foi possível abrir este arquivo. Verifique o acesso ao Storage."
+          "Arquivo indisponível. Verifique as permissões do Storage."
         );
 
         card.replaceChildren(aviso);
@@ -193,18 +199,20 @@ async function carregarGaleria() {
 
       const legenda = document.createElement("p");
       legenda.className = "photo-caption";
-      legenda.textContent = item.nome || "Estação Alegria";
+      legenda.textContent = foto.nome || "Estação Alegria";
 
       card.appendChild(midia);
       card.appendChild(legenda);
       galeria.appendChild(card);
 
-      quantidade++;
+      exibidas++;
     });
 
-    if (quantidade === 0) {
+    if (exibidas === 0) {
       galeria.replaceChildren(
-        criarMensagem("Nenhum arquivo válido foi encontrado na galeria.")
+        criarMensagem(
+          "Nenhum arquivo possui uma URL válida para exibição."
+        )
       );
     }
   } catch (erro) {
@@ -212,9 +220,13 @@ async function carregarGaleria() {
 
     galeria.replaceChildren(
       criarMensagem(
-        "Não foi possível carregar a galeria. Verifique as permissões da tabela fotos no Supabase."
+        erro.message === "Tempo limite ao consultar a galeria."
+          ? "A consulta demorou demais. Verifique a conexão e as permissões do Supabase."
+          : "Erro ao consultar as fotos. Verifique a tabela fotos e suas permissões."
       )
     );
+  } finally {
+    clearTimeout(temporizador);
   }
 }
 
@@ -231,7 +243,7 @@ async function carregarEventos() {
 
   if (!container) return;
 
-  container.replaceChildren(criarMensagem("Carregando eventos..."));
+  container.textContent = "Carregando eventos...";
 
   try {
     const { data, error } = await supabaseClient
@@ -300,7 +312,7 @@ async function carregarPromocoes() {
 
   if (!container) return;
 
-  container.replaceChildren(criarMensagem("Carregando promoções..."));
+  container.textContent = "Carregando promoções...";
 
   try {
     const { data, error } = await supabaseClient
@@ -319,6 +331,7 @@ async function carregarPromocoes() {
       if (!promocao.validade) return true;
 
       const validade = new Date(`${promocao.validade}T23:59:59`);
+
       return !Number.isNaN(validade.getTime()) && validade >= hoje;
     });
 
@@ -381,7 +394,7 @@ async function carregarAvisos() {
 
   if (!container) return;
 
-  container.replaceChildren(criarMensagem("Carregando avisos..."));
+  container.textContent = "Carregando avisos...";
 
   try {
     const { data, error } = await supabaseClient
@@ -429,9 +442,7 @@ function formatarData(valor) {
 
   const data = new Date(valor);
 
-  if (Number.isNaN(data.getTime())) {
-    return valor;
-  }
+  if (Number.isNaN(data.getTime())) return valor;
 
   return data.toLocaleDateString("pt-BR", {
     day: "2-digit",
