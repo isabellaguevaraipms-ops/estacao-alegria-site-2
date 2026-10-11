@@ -1138,3 +1138,81 @@ button {
     height: 230px;
   }
 }
+/* Botão de modo claro e noturno */
+.theme-toggle {
+  width: 44px;
+  height: 44px;
+  border: 2px solid rgba(8, 169, 214, 0.25);
+  border-radius: 50%;
+  background: #fff;
+  color: #17324d;
+  font-size: 22px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.08);
+}
+
+body.dark-mode {
+  background: #101820;
+  color: #f1f5f9;
+}
+
+body.dark-mode .header,
+body.dark-mode .footer {
+  background: #17232e;
+  color: #f1f5f9;
+}
+
+body.dark-mode .section,
+body.dark-mode .intro,
+body.dark-mode .gallery-section,
+body.dark-mode .events-section,
+body.dark-mode .contact-section {
+  color: #f1f5f9;
+}
+
+body.dark-mode .section h2,
+body.dark-mode .section h3,
+body.dark-mode .section p,
+body.dark-mode .footer p,
+body.dark-mode .footer a,
+body.dark-mode .footer small {
+  color: #f1f5f9;
+}
+
+body.dark-mode .feature-card,
+body.dark-mode .contact-card,
+body.dark-mode .event-card,
+body.dark-mode .promotion-card,
+body.dark-mode .notice-card {
+  background: #1c2b38;
+  color: #f1f5f9;
+  border-color: #304454;
+}
+
+body.dark-mode .theme-toggle {
+  background: #263746;
+  color: #fff;
+  border-color: #536777;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background: #1c2b38;
+  color: #fff;
+  border-color: #536777;
+}
+
+@media (max-width: 900px) {
+  .theme-toggle {
+    margin: 8px;
+  }
+}
