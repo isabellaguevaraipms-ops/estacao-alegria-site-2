@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ==========================================
 
   const SUPABASE_URL = "https://ggxhghszthcgnkecoiir.supabase.co";
-const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
+  const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
 
   let supabaseClient = null;
 
@@ -107,6 +107,7 @@ const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
       img.loading = "lazy";
       img.referrerPolicy = "no-referrer";
       img.onerror = () => img.remove();
+
       artigo.appendChild(img);
     }
 
@@ -119,7 +120,9 @@ const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
     );
 
     conteudo.appendChild(emoji);
-    conteudo.appendChild(criarElemento("h3", "", titulo || "Novidade"));
+    conteudo.appendChild(
+      criarElemento("h3", "", titulo || "Novidade")
+    );
 
     if (data) {
       const dataElemento = criarElemento(
@@ -127,6 +130,7 @@ const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
         "item-date",
         `${tipo === "evento" ? "Data do evento" : "Válido até"}: ${formatarData(data)}`
       );
+
       conteudo.appendChild(dataElemento);
     }
 
@@ -163,7 +167,10 @@ const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
     const { data, error } = await supabaseClient
       .from("eventos")
       .select("id, titulo, descricao, data_evento, imagem_url, created_at")
-      .order("data_evento", { ascending: true, nullsFirst: false });
+      .order("data_evento", {
+        ascending: true,
+        nullsFirst: false
+      });
 
     if (error) {
       console.error("Erro ao carregar eventos:", error);
@@ -174,7 +181,10 @@ const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
     container.replaceChildren();
 
     if (!data || data.length === 0) {
-      mostrarMensagem(container, "Ainda não há eventos publicados. Fique de olho nas novidades!");
+      mostrarMensagem(
+        container,
+        "Ainda não há eventos publicados. Fique de olho nas novidades!"
+      );
       return;
     }
 
@@ -224,11 +234,18 @@ const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
       if (!promocao.validade) return true;
 
       const validade = new Date(`${promocao.validade}T23:59:59`);
-      return !Number.isNaN(validade.getTime()) && validade >= hoje;
+
+      return (
+        !Number.isNaN(validade.getTime()) &&
+        validade >= hoje
+      );
     });
 
     if (ativas.length === 0) {
-      mostrarMensagem(container, "No momento, não há promoções ativas.");
+      mostrarMensagem(
+        container,
+        "No momento, não há promoções ativas."
+      );
       return;
     }
 
@@ -272,15 +289,26 @@ const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
     container.replaceChildren();
 
     if (!data || data.length === 0) {
-      mostrarMensagem(container, "Não há avisos publicados no momento.");
+      mostrarMensagem(
+        container,
+        "Não há avisos publicados no momento."
+      );
       return;
     }
 
     data.forEach((aviso) => {
       const cartao = criarElemento("article", "announcement-card");
-      const icone = criarElemento("div", "announcement-icon", "📢");
+      const icone = criarElemento(
+        "div",
+        "announcement-icon",
+        "📢"
+      );
       const conteudo = criarElemento("div");
-      const titulo = criarElemento("h3", "", aviso.titulo || "Aviso");
+      const titulo = criarElemento(
+        "h3",
+        "",
+        aviso.titulo || "Aviso"
+      );
 
       conteudo.appendChild(titulo);
 
@@ -297,12 +325,89 @@ const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
   }
 
   // ==========================================
-  // 7. INICIALIZAR CONTEÚDOS
+  // 7. CARREGAR FOTOS DA GALERIA
+  // ==========================================
+
+  async function carregarGaleria() {
+    const galeria = document.getElementById("photoGallery");
+
+    if (!galeria) {
+      console.warn(
+        "Galeria não encontrada: confira se o HTML tem id='photoGallery'."
+      );
+      return;
+    }
+
+    if (!supabaseClient) {
+      mostrarMensagem(
+        galeria,
+        "Não foi possível conectar à galeria."
+      );
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("fotos")
+      .select("id, nome, imagem_url, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Erro ao carregar fotos da galeria:", error);
+      mostrarMensagem(
+        galeria,
+        "Não foi possível carregar as fotos."
+      );
+      return;
+    }
+
+    galeria.replaceChildren();
+
+    if (!data || data.length === 0) {
+      mostrarMensagem(
+        galeria,
+        "Ainda não há fotos na galeria."
+      );
+      return;
+    }
+
+    let fotosExibidas = 0;
+
+    data.forEach((foto) => {
+      if (!foto.imagem_url) return;
+
+      const imagem = document.createElement("img");
+      imagem.src = foto.imagem_url;
+      imagem.alt = foto.nome || "Foto da Estação Alegria";
+      imagem.loading = "lazy";
+
+      imagem.onerror = () => {
+        console.error(
+          "Não foi possível exibir esta foto:",
+          foto.imagem_url
+        );
+        imagem.remove();
+      };
+
+      galeria.appendChild(imagem);
+      fotosExibidas++;
+    });
+
+    if (fotosExibidas === 0) {
+      mostrarMensagem(
+        galeria,
+        "Nenhuma foto válida foi encontrada."
+      );
+    }
+  }
+
+  // ==========================================
+  // 8. INICIALIZAR CONTEÚDOS
   // ==========================================
 
   await Promise.allSettled([
     carregarEventos(),
     carregarPromocoes(),
-    carregarAvisos()
+    carregarAvisos(),
+    carregarGaleria()
   ]);
 });
