@@ -45,6 +45,7 @@
   </header>
 
   <main>
+    <!-- INÍCIO -->
     <section class="hero" id="inicio">
       <div class="hero-content">
         <span class="hero-label">☀ SOL, ÁGUA E ALEGRIA!</span>
@@ -78,6 +79,7 @@
       <span></span><span></span><span></span><span></span><span></span>
     </div>
 
+    <!-- SOBRE O CLUBE -->
     <section class="section intro" id="clube">
       <span class="eyebrow">💙 PRAZER, SOMOS A ESTAÇÃO ALEGRIA</span>
 
@@ -94,6 +96,7 @@
       </div>
     </section>
 
+    <!-- ATRAÇÕES -->
     <section class="section attractions" id="atracoes">
       <div class="section-heading">
         <span class="eyebrow">🎉 DIVERSÃO PARA TODOS</span>
@@ -147,28 +150,16 @@
       </p>
     </section>
 
+    <!-- GALERIA DINÂMICA DO SUPABASE -->
     <section class="section gallery-section" id="fotos">
       <div class="section-heading">
         <span class="eyebrow">📸 REGISTRE A ALEGRIA</span>
         <h2>Um pouquinho desse <span>clima de verão!</span></h2>
-        <p>Estas fotos são provisórias e podem ser substituídas pelas imagens reais do clube.</p>
+        <p>Confira as fotos publicadas pela Estação Alegria.</p>
       </div>
 
-      <div class="gallery-grid">
-        <img
-          src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=1000&q=85"
-          alt="Piscina azul"
-          loading="lazy">
-
-        <img
-          src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=85"
-          alt="Água e sol"
-          loading="lazy">
-
-        <img
-          src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=800&q=85"
-          alt="Festa colorida"
-          loading="lazy">
+      <div id="photoGallery" class="gallery-grid" aria-live="polite">
+        <p>Carregando fotos...</p>
       </div>
 
       <a class="btn blue"
@@ -178,7 +169,7 @@
       </a>
     </section>
 
-    <!-- EVENTOS CADASTRADOS NO PAINEL -->
+    <!-- EVENTOS -->
     <section class="section events-section" id="eventos">
       <div class="section-heading">
         <span class="eyebrow">📅 FIQUE POR DENTRO</span>
@@ -196,7 +187,7 @@
       </div>
     </section>
 
-    <!-- PROMOÇÕES CADASTRADAS NO PAINEL -->
+    <!-- PROMOÇÕES -->
     <section class="section promotions-section" id="promocoes">
       <div class="promotion-content">
         <span class="eyebrow">🎁 APROVEITE</span>
@@ -222,6 +213,7 @@
       </div>
     </section>
 
+    <!-- CONTATO -->
     <section class="section contact-section" id="contato">
       <div class="section-heading">
         <span class="eyebrow">📍 ESTAMOS TE ESPERANDO</span>
@@ -273,6 +265,7 @@
     </section>
   </main>
 
+  <!-- RODAPÉ -->
   <footer class="footer">
     <a class="logo footer-logo" href="#inicio">
       <span class="sun">☀</span>
@@ -302,6 +295,7 @@
     </small>
   </footer>
 
+  <!-- BOTÃO FLUTUANTE -->
   <a
     class="floating-whatsapp"
     href="https://www.instagram.com/estacao_alegria_oficial/"
@@ -311,10 +305,10 @@
     ◎
   </a>
 
-  <!-- Biblioteca do Supabase -->
+  <!-- BIBLIOTECA DO SUPABASE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- JavaScript do site -->
+  <!-- JAVASCRIPT DO SITE -->
   <script src="script.js"></script>
 </body>
 </html>
