@@ -14,6 +14,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900;1000&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    .gallery-grid,
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .photo-card,
+    .event-card,
+    .promotion-card,
+    .notice-card {
+      overflow: hidden;
+      border-radius: 16px;
+      padding: 16px;
+      background: #fff;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
+    }
+
+    .gallery-media,
+    .photo-card img,
+    .photo-card video,
+    .event-card img,
+    .promotion-card img {
+      display: block;
+      width: 100%;
+      max-height: 360px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .photo-caption {
+      margin: 10px 0 0;
+      font-weight: 700;
+    }
+
+    .loading-message {
+      padding: 16px;
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
@@ -23,7 +65,10 @@
       <span>Estação <strong>Alegria</strong></span>
     </a>
 
-    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navigation">☰</button>
+    <button class="menu-toggle" id="menuToggle"
+      aria-label="Abrir menu"
+      aria-expanded="false"
+      aria-controls="navigation">☰</button>
 
     <nav id="navigation" aria-label="Menu principal">
       <a class="active" href="#inicio">Início</a>
@@ -34,7 +79,9 @@
       <a href="#contato">Contato</a>
     </nav>
 
-    <a class="btn pink header-whatsapp" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">
+    <a class="btn pink header-whatsapp"
+      href="https://www.instagram.com/estacao_alegria_oficial/"
+      target="_blank" rel="noopener noreferrer">
       ◎ Instagram
     </a>
   </header>
@@ -47,11 +94,17 @@
         <p>Piscinas, brincadeiras e momentos especiais para curtir com toda a família.</p>
 
         <div class="actions">
-          <a class="btn green" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Conheça nosso Instagram</a>
+          <a class="btn green"
+            href="https://www.instagram.com/estacao_alegria_oficial/"
+            target="_blank" rel="noopener noreferrer">
+            ◎ Conheça nosso Instagram
+          </a>
           <a class="btn yellow" href="#fotos">Veja nossas fotos ↓</a>
         </div>
 
-        <div class="hero-note"><span>🌴</span> Seu lugar para relaxar e se divertir!</div>
+        <div class="hero-note">
+          <span>🌴</span> Seu lugar para relaxar e se divertir!
+        </div>
       </div>
 
       <div class="hero-sticker sticker-sun" aria-hidden="true">☀️</div>
@@ -71,7 +124,6 @@
       </p>
     </section>
 
-    <!-- GALERIA -->
     <section class="section gallery-section" id="fotos">
       <div class="section-heading">
         <span class="eyebrow">📸 REGISTRE A ALEGRIA</span>
@@ -80,13 +132,16 @@
       </div>
 
       <div id="photoGallery" class="gallery-grid" aria-live="polite">
-        <p>Carregando fotos...</p>
+        <p class="loading-message">Carregando fotos...</p>
       </div>
 
-      <a class="btn blue" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Visitar Instagram oficial</a>
+      <a class="btn blue"
+        href="https://www.instagram.com/estacao_alegria_oficial/"
+        target="_blank" rel="noopener noreferrer">
+        ◎ Visitar Instagram oficial
+      </a>
     </section>
 
-    <!-- EVENTOS -->
     <section class="section events-section" id="eventos">
       <div class="section-heading">
         <span class="eyebrow">📅 FIQUE POR DENTRO</span>
@@ -95,30 +150,35 @@
       </div>
 
       <div id="eventList" class="card-grid" aria-live="polite">
-        <p>Carregando os próximos eventos...</p>
+        <p class="loading-message">Carregando os próximos eventos...</p>
       </div>
 
       <div id="noticeList" class="notices-list" aria-live="polite"></div>
     </section>
 
-    <!-- PROMOÇÕES -->
     <section class="section promotions-section" id="promocoes">
       <div class="promotion-content">
         <span class="eyebrow">🎁 APROVEITE</span>
         <h2>Seu próximo dia feliz pode começar agora!</h2>
-        <p>Confira as promoções e novidades da Estação Alegria. Consulte o clube para confirmar as condições de cada oferta.</p>
+        <p>
+          Confira as promoções e novidades da Estação Alegria.
+          Consulte o clube para confirmar as condições de cada oferta.
+        </p>
 
-        <a class="btn yellow" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Ver Instagram oficial</a>
+        <a class="btn yellow"
+          href="https://www.instagram.com/estacao_alegria_oficial/"
+          target="_blank" rel="noopener noreferrer">
+          ◎ Ver Instagram oficial
+        </a>
       </div>
 
       <div class="promotion-decoration" aria-hidden="true">🌴☀️🍉</div>
 
       <div id="promotionList" class="card-grid" aria-live="polite">
-        <p>Carregando as promoções...</p>
+        <p class="loading-message">Carregando as promoções...</p>
       </div>
     </section>
 
-    <!-- CONTATO -->
     <section class="section contact-section" id="contato">
       <div class="section-heading">
         <span class="eyebrow">📍 ESTAMOS TE ESPERANDO</span>
@@ -151,8 +211,17 @@
             </div>
           </div>
 
-          <a class="btn blue full-width" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Acesse nosso Instagram</a>
-          <a class="btn blue full-width" href="https://maps.google.com/?q=Rua+Dez+312+Monte+Mor+SP" target="_blank" rel="noopener noreferrer">Abrir no Google Maps ↗</a>
+          <a class="btn blue full-width"
+            href="https://www.instagram.com/estacao_alegria_oficial/"
+            target="_blank" rel="noopener noreferrer">
+            ◎ Acesse nosso Instagram
+          </a>
+
+          <a class="btn blue full-width"
+            href="https://maps.google.com/?q=Rua+Dez+312+Monte+Mor+SP"
+            target="_blank" rel="noopener noreferrer">
+            Abrir no Google Maps ↗
+          </a>
         </div>
       </div>
     </section>
@@ -171,17 +240,21 @@
       <a href="#fotos">Fotos</a>
       <a href="#eventos">Eventos</a>
       <a href="#contato">Contato</a>
-      <a href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">Instagram</a>
+      <a href="https://www.instagram.com/estacao_alegria_oficial/"
+        target="_blank" rel="noopener noreferrer">Instagram</a>
     </div>
 
     <small>© <span id="currentYear">2026</span> Estação Alegria. Todos os direitos reservados.</small>
     <small class="footer-note">Informações sujeitas a confirmação pelo estabelecimento.</small>
   </footer>
 
-  <a class="floating-whatsapp" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer" aria-label="Visite o Instagram da Estação Alegria">◎</a>
+  <a class="floating-whatsapp"
+    href="https://www.instagram.com/estacao_alegria_oficial/"
+    target="_blank" rel="noopener noreferrer"
+    aria-label="Visite o Instagram da Estação Alegria">◎</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js"></script>
+  <script src="script.js?v=2"></script>
 </body>
 </html>
 ```
