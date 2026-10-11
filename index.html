@@ -1,11 +1,11 @@
-```html
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#08a9d6">
-  <meta name="description" content="Conheça a Estação Alegria, clube de lazer familiar em Monte Mor, SP. Confira fotos, eventos e promoções.">
+  <meta name="description" content="Conheça a Estação Alegria, clube de lazer familiar em Monte Mor, SP. Confira fotos, eventos, promoções e avaliações.">
 
   <title>Estação Alegria | Diversão para toda a família</title>
 
@@ -23,52 +23,36 @@
       <span>Estação <strong>Alegria</strong></span>
     </a>
 
-    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navigation">
-      ☰
-    </button>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navigation">☰</button>
 
     <nav id="navigation" aria-label="Menu principal">
       <a class="active" href="#inicio">Início</a>
       <a href="#clube">O clube</a>
       <a href="#fotos">Fotos</a>
+      <a href="#avaliacoes">Avaliações</a>
       <a href="#eventos">Eventos</a>
       <a href="#promocoes">Promoções</a>
       <a href="#contato">Contato</a>
     </nav>
 
-    <a class="btn pink header-whatsapp"
-       href="https://www.instagram.com/estacao_alegria_oficial/"
-       target="_blank" rel="noopener noreferrer">
+    <a class="btn pink header-whatsapp" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">
       ◎ Instagram
-          
     </a>
   </header>
 
   <main>
-    <!-- INÍCIO -->
     <section class="hero" id="inicio">
       <div class="hero-content">
         <span class="hero-label">☀ SOL, ÁGUA E ALEGRIA!</span>
-
         <h1>Seu próximo dia de diversão começa aqui!</h1>
-
         <p>Piscinas, brincadeiras e momentos especiais para curtir com toda a família.</p>
 
         <div class="actions">
-          <a class="btn green"
-             href="https://www.instagram.com/estacao_alegria_oficial/"
-             target="_blank" rel="noopener noreferrer">
-            ◎ Conheça nosso Instagram
-          </a>
-
-          <a class="btn yellow" href="#fotos">
-            Veja nossas fotos ↓
-          </a>
+          <a class="btn green" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Conheça nosso Instagram</a>
+          <a class="btn yellow" href="#fotos">Veja nossas fotos ↓</a>
         </div>
 
-        <div class="hero-note">
-          <span>🌴</span> Seu lugar para relaxar e se divertir!
-        </div>
+        <div class="hero-note"><span>🌴</span> Seu lugar para relaxar e se divertir!</div>
       </div>
 
       <div class="hero-sticker sticker-sun" aria-hidden="true">☀️</div>
@@ -79,24 +63,65 @@
       <span></span><span></span><span></span><span></span><span></span>
     </div>
 
-    <!-- SOBRE O CLUBE -->
     <section class="section intro" id="clube">
       <span class="eyebrow">💙 PRAZER, SOMOS A ESTAÇÃO ALEGRIA</span>
-
       <h2>Um clube de lazer feito para <span>viver bons momentos!</span></h2>
-
       <p>
         A Estação Alegria é um espaço de lazer familiar em Monte Mor, São Paulo.
         Um lugar para aproveitar o dia, reunir pessoas especiais e criar lembranças inesquecíveis.
       </p>
 
-      <div class="rating">
-        ⭐ <strong>4,8 de 5</strong>
-        <span>· 28 avaliações informadas</span>
+      <div class="rating" id="ratingSummary">
+        ⭐ <strong id="averageRating">Carregando...</strong>
+        <span id="ratingCount">Buscando avaliações</span>
       </div>
     </section>
 
-    <!-- GALERIA DINÂMICA DO SUPABASE -->
+    <!-- AVALIAÇÕES DOS CLIENTES -->
+    <section class="section reviews-section" id="avaliacoes">
+      <div class="section-heading">
+        <span class="eyebrow">⭐ SUA OPINIÃO É IMPORTANTE</span>
+        <h2>Conte como foi sua <span>experiência!</span></h2>
+        <p>Avalie a Estação Alegria e ajude outras famílias a nos conhecer.</p>
+      </div>
+
+      <form id="reviewForm" class="review-form">
+        <label for="reviewName">Seu nome (opcional)</label>
+        <input type="text" id="reviewName" name="nome" maxlength="60" placeholder="Como podemos te chamar?">
+
+        <fieldset class="star-field">
+          <legend>Sua nota</legend>
+          <div id="starSelector" class="star-selector" role="group" aria-label="Escolha de 1 a 5 estrelas">
+            <button type="button" data-rating="1" aria-label="1 estrela" aria-pressed="false">★</button>
+            <button type="button" data-rating="2" aria-label="2 estrelas" aria-pressed="false">★</button>
+            <button type="button" data-rating="3" aria-label="3 estrelas" aria-pressed="false">★</button>
+            <button type="button" data-rating="4" aria-label="4 estrelas" aria-pressed="false">★</button>
+            <button type="button" data-rating="5" aria-label="5 estrelas" aria-pressed="false">★</button>
+          </div>
+          <input type="hidden" id="reviewRating" name="nota">
+        </fieldset>
+
+        <label for="reviewComment">Seu comentário</label>
+        <textarea id="reviewComment" name="comentario" maxlength="1000" rows="4" placeholder="Conte como foi sua visita..." required></textarea>
+
+        <!-- Campo simples contra envios automáticos -->
+        <div class="review-honeypot" aria-hidden="true">
+          <label for="reviewWebsite">Não preencha este campo</label>
+          <input type="text" id="reviewWebsite" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <button class="btn blue" type="submit" id="submitReview">Enviar avaliação</button>
+
+        <p id="reviewMessage" role="status" aria-live="polite"></p>
+        <small>As avaliações passam por aprovação antes de serem publicadas.</small>
+      </form>
+
+      <div id="reviewsList" class="reviews-list" aria-live="polite">
+        <p>Carregando avaliações...</p>
+      </div>
+    </section>
+
+    <!-- GALERIA -->
     <section class="section gallery-section" id="fotos">
       <div class="section-heading">
         <span class="eyebrow">📸 REGISTRE A ALEGRIA</span>
@@ -108,11 +133,7 @@
         <p>Carregando fotos...</p>
       </div>
 
-      <a class="btn blue"
-         href="https://www.instagram.com/estacao_alegria_oficial/"
-         target="_blank" rel="noopener noreferrer">
-        ◎ Visitar Instagram oficial
-      </a>
+      <a class="btn blue" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Visitar Instagram oficial</a>
     </section>
 
     <!-- EVENTOS -->
@@ -127,29 +148,17 @@
         <p>Carregando os próximos eventos...</p>
       </div>
 
-      <!-- AVISOS PUBLICADOS PELO PROPRIETÁRIO -->
-      <div id="noticeList" class="notices-list" aria-live="polite">
-        <!-- Os avisos serão carregados automaticamente pelo script.js -->
-      </div>
+      <div id="noticeList" class="notices-list" aria-live="polite"></div>
     </section>
 
     <!-- PROMOÇÕES -->
     <section class="section promotions-section" id="promocoes">
       <div class="promotion-content">
         <span class="eyebrow">🎁 APROVEITE</span>
-
         <h2>Seu próximo dia feliz pode começar agora!</h2>
+        <p>Confira as promoções e novidades da Estação Alegria. Consulte o clube para confirmar as condições de cada oferta.</p>
 
-        <p>
-          Confira as promoções e novidades da Estação Alegria.
-          Consulte o clube para confirmar as condições de cada oferta.
-        </p>
-
-        <a class="btn yellow"
-           href="https://www.instagram.com/estacao_alegria_oficial/"
-           target="_blank" rel="noopener noreferrer">
-          ◎ Ver Instagram oficial
-        </a>
+        <a class="btn yellow" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Ver Instagram oficial</a>
       </div>
 
       <div class="promotion-decoration" aria-hidden="true">🌴☀️🍉</div>
@@ -180,10 +189,7 @@
             <span class="contact-icon">📍</span>
             <div>
               <h3>Nosso endereço</h3>
-              <p>
-                Rua Dez, nº 312, Recanto das Orquídeas,
-                Monte Mor – SP, CEP 13190-000.
-              </p>
+              <p>Rua Dez, nº 312, Recanto das Orquídeas, Monte Mor – SP, CEP 13190-000.</p>
             </div>
           </div>
 
@@ -195,23 +201,13 @@
             </div>
           </div>
 
-          <a class="btn blue full-width"
-             href="https://www.instagram.com/estacao_alegria_oficial/"
-             target="_blank" rel="noopener noreferrer">
-            ◎ Acesse nosso Instagram
-          </a>
-
-          <a class="btn blue full-width"
-             href="https://maps.google.com/?q=Rua+Dez+312+Monte+Mor+SP"
-             target="_blank" rel="noopener noreferrer">
-            Abrir no Google Maps ↗
-          </a>
+          <a class="btn blue full-width" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">◎ Acesse nosso Instagram</a>
+          <a class="btn blue full-width" href="https://maps.google.com/?q=Rua+Dez+312+Monte+Mor+SP" target="_blank" rel="noopener noreferrer">Abrir no Google Maps ↗</a>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- RODAPÉ -->
   <footer class="footer">
     <a class="logo footer-logo" href="#inicio">
       <span class="sun">☀</span>
@@ -222,39 +218,18 @@
 
     <div class="footer-links">
       <a href="#clube">O clube</a>
+      <a href="#avaliacoes">Avaliações</a>
       <a href="#contato">Contato</a>
-      <a
-        href="https://www.instagram.com/estacao_alegria_oficial/"
-        target="_blank" rel="noopener noreferrer">
-        Instagram
-      </a>
+      <a href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">Instagram</a>
     </div>
 
-    <small>
-      © <span id="currentYear">2026</span> Estação Alegria.
-      Todos os direitos reservados.
-    </small>
-
-    <small class="footer-note">
-      Informações sujeitas a confirmação pelo estabelecimento.
-    </small>
+    <small>© <span id="currentYear">2026</span> Estação Alegria. Todos os direitos reservados.</small>
+    <small class="footer-note">Informações sujeitas a confirmação pelo estabelecimento.</small>
   </footer>
 
-  <!-- BOTÃO FLUTUANTE -->
-  <a
-    class="floating-whatsapp"
-    href="https://www.instagram.com/estacao_alegria_oficial/"
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Visite o Instagram da Estação Alegria">
-    ◎
-  </a>
+  <a class="floating-whatsapp" href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer" aria-label="Visite o Instagram da Estação Alegria">◎</a>
 
-  <!-- BIBLIOTECA DO SUPABASE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- JAVASCRIPT DO SITE -->
   <script src="script.js"></script>
 </body>
 </html>
-```
