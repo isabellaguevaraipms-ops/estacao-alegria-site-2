@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", async () => {
   // ==========================================
   // 1. CONFIGURAÇÃO DO SUPABASE
@@ -10,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let supabaseClient = null;
 
   try {
-    if (window.supabase && window.supabase.createClient) {
+    if (window.supabase?.createClient) {
       supabaseClient = window.supabase.createClient(
         SUPABASE_URL,
         SUPABASE_KEY
@@ -19,7 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("A biblioteca do Supabase não foi carregada.");
     }
   } catch (error) {
-    console.error("Erro ao conectar ao Supabase:", error);
+    console.error("Erro ao iniciar o Supabase:", error);
   }
 
   // ==========================================
@@ -97,22 +96,148 @@ document.addEventListener("DOMContentLoaded", async () => {
     return dataValida.toLocaleDateString("pt-BR");
   }
 
+  function mostrarMensagem(container, mensagem) {
+    if (!container) return;
+
+    container.replaceChildren(
+      criarElemento("p", "empty-message", mensagem)
+    );
+  }
+
+  // Detecta o formato pela extensão do arquivo ou URL.
+  function obterExtensao(valor) {
+    if (!valor || typeof valor !== "string") return "";
+
+    try {
+      const url = new URL(valor, window.location.href);
+      const caminho = decodeURIComponent(url.pathname);
+      const nome = caminho.split("/").pop() || "";
+      const ponto = nome.lastIndexOf(".");
+
+      return ponto >= 0 ? nome.slice(ponto + 1).toLowerCase() : "";
+    } catch {
+      const nome = valor.split("?")[0].split("#")[0];
+      const ponto = nome.lastIndexOf(".");
+
+      return ponto >= 0 ? nome.slice(ponto + 1).toLowerCase() : "";
+    }
+  }
+
+  function ehVideo(item) {
+    const extensoesVideo = [
+      "mp4",
+      "webm",
+      "mov",
+      "m4v",
+      "ogv",
+      "ogg"
+    ];
+
+    const mime = (item?.mime_type || item?.tipo || "").toLowerCase();
+
+    if (mime.startsWith("video/")) return true;
+
+    const arquivo = item?.storage_path || item?.imagem_url || "";
+
+    return extensoesVideo.includes(obterExtensao(arquivo));
+  }
+
+  // Cria o elemento certo para cada tipo de arquivo.
+  function criarMidia(item, opcoes = {}) {
+    const video = ehVideo(item);
+    const url = item?.imagem_url;
+    const titulo = item?.nome || "Conteúdo da Estação Alegria";
+
+    if (!url) {
+      return criarElemento(
+        "p",
+        "media-error",
+        "Este conteúdo não possui uma URL disponível."
+      );
+    }
+
+    let midia;
+
+    if (video) {
+      midia = document.createElement("video");
+      midia.controls = true;
+      midia.playsInline = true;
+      midia.preload = "metadata";
+      midia.setAttribute("aria-label", titulo);
+
+      // Evita reprodução automática e consumo desnecessário de dados.
+      midia.muted = false;
+
+      const extensao = obterExtensao(item.storage_path || url);
+
+      if (extensao === "mp4" || extensao === "m4v") {
+        midia.setAttribute("type", "video/mp4");
+      } else if (extensao === "webm") {
+        midia.setAttribute("type", "video/webm");
+      } else if (extensao === "ogv" || extensao === "ogg") {
+        midia.setAttribute("type", "video/ogg");
+      }
+
+      midia.src = url;
+
+      midia.addEventListener("error", () => {
+        console.error("Falha ao carregar vídeo:", url);
+
+        const erro = criarElemento(
+          "p",
+          "media-error",
+          "Não foi possível carregar este vídeo. Verifique o arquivo e o acesso no Supabase."
+        );
+
+        midia.replaceWith(erro);
+      }, { once: true });
+    } else {
+      midia = document.createElement("img");
+      midia.src = url;
+      midia.alt = titulo;
+      midia.loading = "lazy";
+      midia.decoding = "async";
+
+      midia.addEventListener("error", () => {
+        console.error("Falha ao carregar imagem:", url);
+
+        const erro = criarElemento(
+          "p",
+          "media-error",
+          "Não foi possível carregar esta imagem."
+        );
+
+        midia.replaceWith(erro);
+      }, { once: true });
+    }
+
+    midia.classList.add("gallery-media");
+
+    if (opcoes.destaque) {
+      midia.classList.add("gallery-media-featured");
+    }
+
+    return midia;
+  }
+
+  // ==========================================
+  // 4. CARTÕES DE EVENTOS E PROMOÇÕES
+  // ==========================================
+
   function criarCartao(titulo, descricao, data, imagem, tipo) {
     const artigo = criarElemento("article", "feature-card");
 
     if (imagem) {
-      const img = criarElemento("img");
-      img.src = imagem;
-      img.alt = titulo || "Imagem de divulgação";
-      img.loading = "lazy";
-      img.referrerPolicy = "no-referrer";
-      img.onerror = () => img.remove();
+      const itemMidia = {
+        nome: titulo,
+        imagem_url: imagem,
+        storage_path: imagem
+      };
 
-      artigo.appendChild(img);
+      artigo.appendChild(criarMidia(itemMidia));
     }
 
     const conteudo = criarElemento("div", "card-content");
-
     const emoji = criarElemento(
       "span",
       "card-emoji",
@@ -125,13 +250,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     if (data) {
-      const dataElemento = criarElemento(
-        "p",
-        "item-date",
-        `${tipo === "evento" ? "Data do evento" : "Válido até"}: ${formatarData(data)}`
+      conteudo.appendChild(
+        criarElemento(
+          "p",
+          "item-date",
+          `${tipo === "evento" ? "Data do evento" : "Válido até"}: ${formatarData(data)}`
+        )
       );
-
-      conteudo.appendChild(dataElemento);
     }
 
     if (descricao) {
@@ -143,16 +268,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return artigo;
   }
 
-  function mostrarMensagem(container, mensagem) {
-    if (!container) return;
-
-    container.replaceChildren(
-      criarElemento("p", "empty-message", mensagem)
-    );
-  }
-
   // ==========================================
-  // 4. CARREGAR EVENTOS
+  // 5. CARREGAR EVENTOS
   // ==========================================
 
   async function carregarEventos() {
@@ -180,7 +297,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     container.replaceChildren();
 
-    if (!data || data.length === 0) {
+    if (!data?.length) {
       mostrarMensagem(
         container,
         "Ainda não há eventos publicados. Fique de olho nas novidades!"
@@ -202,7 +319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ==========================================
-  // 5. CARREGAR PROMOÇÕES
+  // 6. CARREGAR PROMOÇÕES
   // ==========================================
 
   async function carregarPromocoes() {
@@ -235,17 +352,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const validade = new Date(`${promocao.validade}T23:59:59`);
 
-      return (
-        !Number.isNaN(validade.getTime()) &&
-        validade >= hoje
-      );
+      return !Number.isNaN(validade.getTime()) && validade >= hoje;
     });
 
-    if (ativas.length === 0) {
-      mostrarMensagem(
-        container,
-        "No momento, não há promoções ativas."
-      );
+    if (!ativas.length) {
+      mostrarMensagem(container, "No momento, não há promoções ativas.");
       return;
     }
 
@@ -263,7 +374,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ==========================================
-  // 6. CARREGAR AVISOS
+  // 7. CARREGAR AVISOS
   // ==========================================
 
   async function carregarAvisos() {
@@ -288,120 +399,90 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     container.replaceChildren();
 
-    if (!data || data.length === 0) {
-      mostrarMensagem(
-        container,
-        "Não há avisos publicados no momento."
-      );
+    if (!data?.length) {
+      mostrarMensagem(container, "Não há avisos publicados no momento.");
       return;
     }
 
     data.forEach((aviso) => {
       const cartao = criarElemento("article", "announcement-card");
-      const icone = criarElemento(
-        "div",
-        "announcement-icon",
-        "📢"
-      );
+      const icone = criarElemento("div", "announcement-icon", "📢");
       const conteudo = criarElemento("div");
-      const titulo = criarElemento(
-        "h3",
-        "",
-        aviso.titulo || "Aviso"
-      );
+      const titulo = criarElemento("h3", "", aviso.titulo || "Aviso");
 
       conteudo.appendChild(titulo);
 
       if (aviso.descricao) {
-        conteudo.appendChild(
-          criarElemento("p", "", aviso.descricao)
-        );
+        conteudo.appendChild(criarElemento("p", "", aviso.descricao));
       }
 
-      cartao.appendChild(icone);
-      cartao.appendChild(conteudo);
+      cartao.append(icone, conteudo);
       container.appendChild(cartao);
     });
   }
 
   // ==========================================
-  // 7. CARREGAR FOTOS DA GALERIA
+  // 8. CARREGAR FOTOS E VÍDEOS DA GALERIA
   // ==========================================
 
   async function carregarGaleria() {
     const galeria = document.getElementById("photoGallery");
-
-    if (!galeria) {
-      console.warn(
-        "Galeria não encontrada: confira se o HTML tem id='photoGallery'."
-      );
-      return;
-    }
+    if (!galeria) return;
 
     if (!supabaseClient) {
-      mostrarMensagem(
-        galeria,
-        "Não foi possível conectar à galeria."
-      );
+      mostrarMensagem(galeria, "Não foi possível conectar à galeria.");
       return;
     }
 
     const { data, error } = await supabaseClient
       .from("fotos")
-      .select("id, nome, imagem_url, created_at")
+      .select("id, nome, imagem_url, storage_path, created_at")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Erro ao carregar fotos da galeria:", error);
+      console.error("Erro ao carregar a galeria:", error);
       mostrarMensagem(
         galeria,
-        "Não foi possível carregar as fotos."
+        "Não foi possível carregar a galeria. Tente novamente mais tarde."
       );
       return;
     }
 
     galeria.replaceChildren();
 
-    if (!data || data.length === 0) {
-      mostrarMensagem(
-        galeria,
-        "Ainda não há fotos na galeria."
-      );
+    if (!data?.length) {
+      mostrarMensagem(galeria, "Ainda não há fotos ou vídeos na galeria.");
       return;
     }
 
-    let fotosExibidas = 0;
+    data.forEach((item) => {
+      if (!item.imagem_url) {
+        console.warn("Item da galeria sem imagem_url:", item);
+        return;
+      }
 
-    data.forEach((foto) => {
-      if (!foto.imagem_url) return;
+      const card = criarElemento(
+        "article",
+        ehVideo(item) ? "gallery-item gallery-item-video" : "gallery-item"
+      );
 
-      const imagem = document.createElement("img");
-      imagem.src = foto.imagem_url;
-      imagem.alt = foto.nome || "Foto da Estação Alegria";
-      imagem.loading = "lazy";
+      card.appendChild(criarMidia(item));
 
-      imagem.onerror = () => {
-        console.error(
-          "Não foi possível exibir esta foto:",
-          foto.imagem_url
-        );
-        imagem.remove();
-      };
+      if (item.nome) {
+        const legenda = criarElemento("p", "gallery-caption", item.nome);
+        card.appendChild(legenda);
+      }
 
-      galeria.appendChild(imagem);
-      fotosExibidas++;
+      galeria.appendChild(card);
     });
 
-    if (fotosExibidas === 0) {
-      mostrarMensagem(
-        galeria,
-        "Nenhuma foto válida foi encontrada."
-      );
+    if (!galeria.children.length) {
+      mostrarMensagem(galeria, "Nenhum arquivo válido foi encontrado na galeria.");
     }
   }
 
   // ==========================================
-  // 8. INICIALIZAR CONTEÚDOS
+  // 9. INICIALIZAR CONTEÚDOS
   // ==========================================
 
   await Promise.allSettled([
