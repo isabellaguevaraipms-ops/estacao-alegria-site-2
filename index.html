@@ -1,11 +1,11 @@
-
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#08a9d6">
-  <meta name="description" content="Conheça a Estação Alegria, clube de lazer familiar em Monte Mor, SP. Confira fotos, eventos, promoções e avaliações.">
+  <meta name="description" content="Conheça a Estação Alegria, clube de lazer familiar em Monte Mor, SP. Confira fotos, eventos e promoções.">
 
   <title>Estação Alegria | Diversão para toda a família</title>
 
@@ -29,7 +29,6 @@
       <a class="active" href="#inicio">Início</a>
       <a href="#clube">O clube</a>
       <a href="#fotos">Fotos</a>
-      <a href="#avaliacoes">Avaliações</a>
       <a href="#eventos">Eventos</a>
       <a href="#promocoes">Promoções</a>
       <a href="#contato">Contato</a>
@@ -70,55 +69,6 @@
         A Estação Alegria é um espaço de lazer familiar em Monte Mor, São Paulo.
         Um lugar para aproveitar o dia, reunir pessoas especiais e criar lembranças inesquecíveis.
       </p>
-
-      <div class="rating" id="ratingSummary">
-        ⭐ <strong id="averageRating">Carregando...</strong>
-        <span id="ratingCount">Buscando avaliações</span>
-      </div>
-    </section>
-
-    <!-- AVALIAÇÕES DOS CLIENTES -->
-    <section class="section reviews-section" id="avaliacoes">
-      <div class="section-heading">
-        <span class="eyebrow">⭐ SUA OPINIÃO É IMPORTANTE</span>
-        <h2>Conte como foi sua <span>experiência!</span></h2>
-        <p>Avalie a Estação Alegria e ajude outras famílias a nos conhecer.</p>
-      </div>
-
-      <form id="reviewForm" class="review-form">
-        <label for="reviewName">Seu nome (opcional)</label>
-        <input type="text" id="reviewName" name="nome" maxlength="60" placeholder="Como podemos te chamar?">
-
-        <fieldset class="star-field">
-          <legend>Sua nota</legend>
-          <div id="starSelector" class="star-selector" role="group" aria-label="Escolha de 1 a 5 estrelas">
-            <button type="button" data-rating="1" aria-label="1 estrela" aria-pressed="false">★</button>
-            <button type="button" data-rating="2" aria-label="2 estrelas" aria-pressed="false">★</button>
-            <button type="button" data-rating="3" aria-label="3 estrelas" aria-pressed="false">★</button>
-            <button type="button" data-rating="4" aria-label="4 estrelas" aria-pressed="false">★</button>
-            <button type="button" data-rating="5" aria-label="5 estrelas" aria-pressed="false">★</button>
-          </div>
-          <input type="hidden" id="reviewRating" name="nota">
-        </fieldset>
-
-        <label for="reviewComment">Seu comentário</label>
-        <textarea id="reviewComment" name="comentario" maxlength="1000" rows="4" placeholder="Conte como foi sua visita..." required></textarea>
-
-        <!-- Campo simples contra envios automáticos -->
-        <div class="review-honeypot" aria-hidden="true">
-          <label for="reviewWebsite">Não preencha este campo</label>
-          <input type="text" id="reviewWebsite" name="website" tabindex="-1" autocomplete="off">
-        </div>
-
-        <button class="btn blue" type="submit" id="submitReview">Enviar avaliação</button>
-
-        <p id="reviewMessage" role="status" aria-live="polite"></p>
-        <small>As avaliações passam por aprovação antes de serem publicadas.</small>
-      </form>
-
-      <div id="reviewsList" class="reviews-list" aria-live="polite">
-        <p>Carregando avaliações...</p>
-      </div>
     </section>
 
     <!-- GALERIA -->
@@ -218,7 +168,8 @@
 
     <div class="footer-links">
       <a href="#clube">O clube</a>
-      <a href="#avaliacoes">Avaliações</a>
+      <a href="#fotos">Fotos</a>
+      <a href="#eventos">Eventos</a>
       <a href="#contato">Contato</a>
       <a href="https://www.instagram.com/estacao_alegria_oficial/" target="_blank" rel="noopener noreferrer">Instagram</a>
     </div>
@@ -233,3 +184,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+```
