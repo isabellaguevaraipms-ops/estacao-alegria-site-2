@@ -1,390 +1,424 @@
-```javascript
-// ============================================
-// ESTAÇÃO ALEGRIA — SITE PÚBLICO
-// Compatível com o HTML enviado
-// ============================================
+document.addEventListener("DOMContentLoaded", async () => {
+// ==========================================
+// 1. CONFIGURAÇÃO DO SUPABASE
+// ==========================================
 
 const SUPABASE_URL = "https://ggxhghszthcgnkecoiir.supabase.co";
 const SUPABASE_KEY = "sb_publishable_EohrXK6tulCPMKavk5GQfw_OxIQkxgQ";
-const MEDIA_BUCKET = "foto";
 
 let supabaseClient = null;
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (!window.supabase?.createClient) {
-    mostrarMensagem("photoGallery", "Biblioteca do Supabase não carregada.");
-    mostrarMensagem("eventList", "Não foi possível conectar ao sistema.");
-    mostrarMensagem("promotionList", "Não foi possível conectar ao sistema.");
-    return;
-  }
+try {
+if (window.supabase && window.supabase.createClient) {
+supabaseClient = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+} else {
+console.error("A biblioteca do Supabase não foi carregada.");
+}
+} catch (error) {
+console.error("Erro ao conectar ao Supabase:", error);
+}
 
-  supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+// ==========================================
+// 2. MENU E ANO DO RODAPÉ
+// ==========================================
 
-  configurarMenu();
+const menuToggle = document.getElementById("menuToggle");
+const navigation = document.getElementById("navigation");
+const navLinks = document.querySelectorAll("#navigation a");
+const currentYear = document.getElementById("currentYear");
 
-  const ano = document.getElementById("currentYear");
-  if (ano) ano.textContent = new Date().getFullYear();
+if (currentYear) {
+currentYear.textContent = new Date().getFullYear();
+}
 
-  carregarGaleria();
-  carregarEventos();
-  carregarPromocoes();
-  carregarAvisos();
+if (menuToggle && navigation) {
+menuToggle.addEventListener("click", () => {
+const isOpen = navigation.classList.toggle("open");
+
+menuToggle.setAttribute("aria-expanded", String(isOpen));  
+  menuToggle.setAttribute(  
+    "aria-label",  
+    isOpen ? "Fechar menu" : "Abrir menu"  
+  );  
+  menuToggle.textContent = isOpen ? "✕" : "☰";  
+});  
+
+const closeMenu = () => {  
+  navigation.classList.remove("open");  
+  menuToggle.setAttribute("aria-expanded", "false");  
+  menuToggle.setAttribute("aria-label", "Abrir menu");  
+  menuToggle.textContent = "☰";  
+};  
+
+navLinks.forEach((link) => {  
+  link.addEventListener("click", closeMenu);  
+});  
+
+document.addEventListener("keydown", (event) => {  
+  if (event.key === "Escape") closeMenu();  
+});  
+
+window.addEventListener("resize", () => {  
+  if (window.innerWidth > 820) closeMenu();  
 });
 
-// ============================================
-// FUNÇÕES AUXILIARES
-// ============================================
-
-function mostrarMensagem(id, mensagem) {
-  const elemento = document.getElementById(id);
-  if (elemento) elemento.textContent = mensagem;
 }
+
+navLinks.forEach((link) => {
+link.addEventListener("click", () => {
+navLinks.forEach((item) => item.classList.remove("active"));
+link.classList.add("active");
+});
+});
+
+// ==========================================
+// 3. FUNÇÕES AUXILIARES
+// ==========================================
 
 function criarElemento(tag, classe, texto) {
-  const elemento = document.createElement(tag);
+const elemento = document.createElement(tag);
 
-  if (classe) elemento.className = classe;
-  if (texto !== undefined) elemento.textContent = texto;
+if (classe) elemento.className = classe;  
+if (texto !== undefined) elemento.textContent = texto;  
 
-  return elemento;
+return elemento;
+
 }
 
-function formatarData(valor) {
-  if (!valor) return "";
+function formatarData(data) {
+if (!data) return "";
 
-  const data = new Date(valor);
+const dataValida = new Date(`${data}T12:00:00`);  
 
-  if (Number.isNaN(data.getTime())) return valor;
+if (Number.isNaN(dataValida.getTime())) return "";  
 
-  return data.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
+return dataValida.toLocaleDateString("pt-BR");
+
 }
 
-// Executa uma consulta com limite de espera.
-async function consultarComLimite(consulta, milissegundos = 12000) {
-  let temporizador;
+function criarCartao(titulo, descricao, data, imagem, tipo) {
+const artigo = criarElemento("article", "feature-card");
 
-  try {
-    return await Promise.race([
-      consulta,
-      new Promise((_, rejeitar) => {
-        temporizador = setTimeout(() => {
-          rejeitar(new Error("Tempo limite de conexão com o Supabase."));
-        }, milissegundos);
-      })
-    ]);
-  } finally {
-    clearTimeout(temporizador);
-  }
+if (imagem) {  
+  const img = criarElemento("img");  
+  img.src = imagem;  
+  img.alt = titulo || "Imagem de divulgação";  
+  img.loading = "lazy";  
+  img.referrerPolicy = "no-referrer";  
+  img.onerror = () => img.remove();  
+
+  artigo.appendChild(img);  
+}  
+
+const conteudo = criarElemento("div", "card-content");  
+
+const emoji = criarElemento(  
+  "span",  
+  "card-emoji",  
+  tipo === "evento" ? "📅" : "🎁"  
+);  
+
+conteudo.appendChild(emoji);  
+conteudo.appendChild(  
+  criarElemento("h3", "", titulo || "Novidade")  
+);  
+
+if (data) {  
+  const dataElemento = criarElemento(  
+    "p",  
+    "item-date",  
+    `${tipo === "evento" ? "Data do evento" : "Válido até"}: ${formatarData(data)}`  
+  );  
+
+  conteudo.appendChild(dataElemento);  
+}  
+
+if (descricao) {  
+  conteudo.appendChild(criarElemento("p", "", descricao));  
+}  
+
+artigo.appendChild(conteudo);  
+
+return artigo;
+
 }
 
-// ============================================
-// MENU
-// ============================================
+function mostrarMensagem(container, mensagem) {
+if (!container) return;
 
-function configurarMenu() {
-  const botao = document.getElementById("menuToggle");
-  const navegacao = document.getElementById("navigation");
+container.replaceChildren(  
+  criarElemento("p", "empty-message", mensagem)  
+);
 
-  if (!botao || !navegacao) return;
-
-  botao.addEventListener("click", () => {
-    const aberto = navegacao.classList.toggle("active");
-    botao.setAttribute("aria-expanded", String(aberto));
-  });
-
-  navegacao.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
-      navegacao.classList.remove("active");
-      botao.setAttribute("aria-expanded", "false");
-    });
-  });
 }
 
-// ============================================
-// GALERIA DE FOTOS E VÍDEOS
-// ============================================
-
-async function carregarGaleria() {
-  const galeria = document.getElementById("photoGallery");
-  if (!galeria) return;
-
-  galeria.replaceChildren(criarElemento("p", "", "Carregando fotos..."));
-
-  try {
-    const { data, error } = await consultarComLimite(
-      supabaseClient
-        .from("fotos")
-        .select("id, nome, imagem_url, storage_path, created_at")
-        .order("created_at", { ascending: false })
-    );
-
-    if (error) throw error;
-
-    galeria.replaceChildren();
-
-    if (!data || data.length === 0) {
-      galeria.appendChild(
-        criarElemento("p", "", "Ainda não há fotos ou vídeos publicados.")
-      );
-      return;
-    }
-
-    let quantidade = 0;
-
-    data.forEach((foto) => {
-      let url = foto.imagem_url || "";
-
-      if (!url && foto.storage_path) {
-        const resultado = supabaseClient.storage
-          .from(MEDIA_BUCKET)
-          .getPublicUrl(foto.storage_path);
-
-        url = resultado.data?.publicUrl || "";
-      }
-
-      if (!url) {
-        console.warn("Foto sem URL válida:", foto.id);
-        return;
-      }
-
-      const caminho = (foto.storage_path || url)
-        .split("?")[0]
-        .toLowerCase();
-
-      const ehVideo = /\.(mp4|webm|mov|m4v|ogg)$/i.test(caminho);
-
-      const card = criarElemento("article", "photo-card");
-      const midia = document.createElement(ehVideo ? "video" : "img");
-
-      midia.className = "gallery-media";
-      midia.src = url;
-
-      if (ehVideo) {
-        midia.controls = true;
-        midia.playsInline = true;
-        midia.preload = "metadata";
-      } else {
-        midia.alt = foto.nome || "Estação Alegria";
-        midia.loading = "lazy";
-      }
-
-      midia.addEventListener("error", () => {
-        console.error("Falha ao carregar mídia:", url);
-        midia.replaceWith(
-          criarElemento("p", "", "Não foi possível abrir este arquivo.")
-        );
-      });
-
-      const legenda = criarElemento(
-        "p",
-        "photo-caption",
-        foto.nome || "Estação Alegria"
-      );
-
-      card.append(midia, legenda);
-      galeria.appendChild(card);
-      quantidade++;
-    });
-
-    if (quantidade === 0) {
-      galeria.appendChild(
-        criarElemento("p", "", "Nenhum arquivo válido encontrado.")
-      );
-    }
-  } catch (erro) {
-    console.error("Erro na galeria:", erro);
-
-    galeria.replaceChildren(
-      criarElemento(
-        "p",
-        "",
-        "Não foi possível carregar as fotos. Verifique a conexão e as permissões do Supabase."
-      )
-    );
-  }
-}
-
-// ============================================
-// EVENTOS
-// ============================================
+// ==========================================
+// 4. CARREGAR EVENTOS
+// ==========================================
 
 async function carregarEventos() {
-  const lista = document.getElementById("eventList");
-  if (!lista) return;
+const container = document.getElementById("eventList");
+if (!container) return;
 
-  lista.replaceChildren(criarElemento("p", "", "Carregando eventos..."));
+if (!supabaseClient) {  
+  mostrarMensagem(container, "Não foi possível conectar aos eventos.");  
+  return;  
+}  
 
-  try {
-    const { data, error } = await consultarComLimite(
-      supabaseClient
-        .from("eventos")
-        .select("id, titulo, descricao, data_evento, imagem_url, created_at")
-        .order("data_evento", { ascending: true })
-    );
+const { data, error } = await supabaseClient  
+  .from("eventos")  
+  .select("id, titulo, descricao, data_evento, imagem_url, created_at")  
+  .order("data_evento", {  
+    ascending: true,  
+    nullsFirst: false  
+  });  
 
-    if (error) throw error;
+if (error) {  
+  console.error("Erro ao carregar eventos:", error);  
+  mostrarMensagem(container, "Não foi possível carregar os eventos.");  
+  return;  
+}  
 
-    lista.replaceChildren();
+container.replaceChildren();  
 
-    if (!data?.length) {
-      lista.appendChild(criarElemento("p", "", "Nenhum evento anunciado."));
-      return;
-    }
+if (!data || data.length === 0) {  
+  mostrarMensagem(  
+    container,  
+    "Ainda não há eventos publicados. Fique de olho nas novidades!"  
+  );  
+  return;  
+}  
 
-    data.forEach((evento) => {
-      const card = criarElemento("article", "event-card");
+data.forEach((evento) => {  
+  container.appendChild(  
+    criarCartao(  
+      evento.titulo,  
+      evento.descricao,  
+      evento.data_evento,  
+      evento.imagem_url,  
+      "evento"  
+    )  
+  );  
+});
 
-      card.appendChild(
-        criarElemento("h3", "", evento.titulo || "Evento")
-      );
-
-      if (evento.data_evento) {
-        card.appendChild(
-          criarElemento("p", "event-date", formatarData(evento.data_evento))
-        );
-      }
-
-      if (evento.descricao) {
-        card.appendChild(criarElemento("p", "", evento.descricao));
-      }
-
-      if (evento.imagem_url) {
-        const img = document.createElement("img");
-        img.src = evento.imagem_url;
-        img.alt = evento.titulo || "Evento";
-        img.loading = "lazy";
-        img.addEventListener("error", () => img.remove());
-        card.appendChild(img);
-      }
-
-      lista.appendChild(card);
-    });
-  } catch (erro) {
-    console.error("Erro nos eventos:", erro);
-    lista.replaceChildren(
-      criarElemento("p", "", "Não foi possível carregar os eventos.")
-    );
-  }
 }
 
-// ============================================
-// PROMOÇÕES
-// ============================================
+// ==========================================
+// 5. CARREGAR PROMOÇÕES
+// ==========================================
 
 async function carregarPromocoes() {
-  const lista = document.getElementById("promotionList");
-  if (!lista) return;
+const container = document.getElementById("promotionList");
+if (!container) return;
 
-  lista.replaceChildren(
-    criarElemento("p", "", "Carregando promoções...")
-  );
+if (!supabaseClient) {  
+  mostrarMensagem(container, "Não foi possível conectar às promoções.");  
+  return;  
+}  
 
-  try {
-    const { data, error } = await consultarComLimite(
-      supabaseClient
-        .from("promocoes")
-        .select("id, titulo, descricao, validade, imagem_url, created_at")
-        .order("created_at", { ascending: false })
-    );
+const { data, error } = await supabaseClient  
+  .from("promocoes")  
+  .select("id, titulo, descricao, validade, imagem_url, created_at")  
+  .order("created_at", { ascending: false });  
 
-    if (error) throw error;
+if (error) {  
+  console.error("Erro ao carregar promoções:", error);  
+  mostrarMensagem(container, "Não foi possível carregar as promoções.");  
+  return;  
+}  
 
-    lista.replaceChildren();
+container.replaceChildren();  
 
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
+const hoje = new Date();  
+hoje.setHours(0, 0, 0, 0);  
 
-    const validas = (data || []).filter((promocao) => {
-      if (!promocao.validade) return true;
+const ativas = (data || []).filter((promocao) => {  
+  if (!promocao.validade) return true;  
 
-      const validade = new Date(`${promocao.validade}T23:59:59`);
-      return !Number.isNaN(validade.getTime()) && validade >= hoje;
-    });
+  const validade = new Date(`${promocao.validade}T23:59:59`);  
 
-    if (!validas.length) {
-      lista.appendChild(
-        criarElemento("p", "", "Nenhuma promoção disponível no momento.")
-      );
-      return;
-    }
+  return (  
+    !Number.isNaN(validade.getTime()) &&  
+    validade >= hoje  
+  );  
+});  
 
-    validas.forEach((promocao) => {
-      const card = criarElemento("article", "promotion-card");
+if (ativas.length === 0) {  
+  mostrarMensagem(  
+    container,  
+    "No momento, não há promoções ativas."  
+  );  
+  return;  
+}  
 
-      card.appendChild(
-        criarElemento("h3", "", promocao.titulo || "Promoção")
-      );
+ativas.forEach((promocao) => {  
+  container.appendChild(  
+    criarCartao(  
+      promocao.titulo,  
+      promocao.descricao,  
+      promocao.validade,  
+      promocao.imagem_url,  
+      "promocao"  
+    )  
+  );  
+});
 
-      if (promocao.descricao) {
-        card.appendChild(criarElemento("p", "", promocao.descricao));
-      }
-
-      if (promocao.validade) {
-        card.appendChild(
-          criarElemento(
-            "p",
-            "promotion-validity",
-            `Válida até ${formatarData(promocao.validade)}`
-          )
-        );
-      }
-
-      if (promocao.imagem_url) {
-        const img = document.createElement("img");
-        img.src = promocao.imagem_url;
-        img.alt = promocao.titulo || "Promoção";
-        img.loading = "lazy";
-        img.addEventListener("error", () => img.remove());
-        card.appendChild(img);
-      }
-
-      lista.appendChild(card);
-    });
-  } catch (erro) {
-    console.error("Erro nas promoções:", erro);
-    lista.replaceChildren(
-      criarElemento("p", "", "Não foi possível carregar as promoções.")
-    );
-  }
 }
 
-// ============================================
-// AVISOS
-// ============================================
+// ==========================================
+// 6. CARREGAR AVISOS
+// ==========================================
 
 async function carregarAvisos() {
-  const lista = document.getElementById("noticeList");
-  if (!lista) return;
+const container = document.getElementById("noticeList");
+if (!container) return;
 
-  try {
-    const { data, error } = await consultarComLimite(
-      supabaseClient
-        .from("avisos")
-        .select("id, titulo, descricao, created_at")
-        .order("created_at", { ascending: false })
-    );
+if (!supabaseClient) {  
+  mostrarMensagem(container, "Não foi possível carregar os avisos.");  
+  return;  
+}  
 
-    if (error) throw error;
+const { data, error } = await supabaseClient  
+  .from("avisos")  
+  .select("id, titulo, descricao, created_at")  
+  .order("created_at", { ascending: false });  
 
-    lista.replaceChildren();
+if (error) {  
+  console.error("Erro ao carregar avisos:", error);  
+  mostrarMensagem(container, "Não foi possível carregar os avisos.");  
+  return;  
+}  
 
-    if (!data?.length) return;
+container.replaceChildren();  
 
-    data.forEach((aviso) => {
-      const card = criarElemento("article", "notice-card");
+if (!data || data.length === 0) {  
+  mostrarMensagem(  
+    container,  
+    "Não há avisos publicados no momento."  
+  );  
+  return;  
+}  
 
-      card.appendChild(
-        criarElemento("h3", "", aviso.titulo || "Aviso")
-      );
+data.forEach((aviso) => {  
+  const cartao = criarElemento("article", "announcement-card");  
+  const icone = criarElemento(  
+    "div",  
+    "announcement-icon",  
+    "📢"  
+  );  
+  const conteudo = criarElemento("div");  
+  const titulo = criarElemento(  
+    "h3",  
+    "",  
+    aviso.titulo || "Aviso"  
+  );  
 
-      if (aviso.descricao) {
+  conteudo.appendChild(titulo);  
+
+  if (aviso.descricao) {  
+    conteudo.appendChild(  
+      criarElemento("p", "", aviso.descricao)  
+    );  
+  }  
+
+  cartao.appendChild(icone);  
+  cartao.appendChild(conteudo);  
+  container.appendChild(cartao);  
+});
+
+}
+
+// ==========================================
+// 7. CARREGAR FOTOS DA GALERIA
+// ==========================================
+
+async function carregarGaleria() {
+const galeria = document.getElementById("photoGallery");
+
+if (!galeria) {  
+  console.warn(  
+    "Galeria não encontrada: confira se o HTML tem id='photoGallery'."  
+  );  
+  return;  
+}  
+
+if (!supabaseClient) {  
+  mostrarMensagem(  
+    galeria,  
+    "Não foi possível conectar à galeria."  
+  );  
+  return;  
+}  
+
+const { data, error } = await supabaseClient  
+  .from("fotos")  
+  .select("id, nome, imagem_url, created_at")  
+  .order("created_at", { ascending: false });  
+
+if (error) {  
+  console.error("Erro ao carregar fotos da galeria:", error);  
+  mostrarMensagem(  
+    galeria,  
+    "Não foi possível carregar as fotos."  
+  );  
+  return;  
+}  
+
+galeria.replaceChildren();  
+
+if (!data || data.length === 0) {  
+  mostrarMensagem(  
+    galeria,  
+    "Ainda não há fotos na galeria."  
+  );  
+  return;  
+}  
+
+let fotosExibidas = 0;  
+
+data.forEach((foto) => {  
+  if (!foto.imagem_url) return;  
+
+  const imagem = document.createElement("img");  
+  imagem.src = foto.imagem_url;  
+  imagem.alt = foto.nome || "Foto da Estação Alegria";  
+  imagem.loading = "lazy";  
+
+  imagem.onerror = () => {  
+    console.error(  
+      "Não foi possível exibir esta foto:",  
+      foto.imagem_url  
+    );  
+    imagem.remove();  
+  };  
+
+  galeria.appendChild(imagem);  
+  fotosExibidas++;  
+});  
+
+if (fotosExibidas === 0) {  
+  mostrarMensagem(  
+    galeria,  
+    "Nenhuma foto válida foi encontrada."  
+  );  
+}
+
+}
+
+// ==========================================
+// 8. INICIALIZAR CONTEÚDOS
+// ==========================================
+
+await Promise.allSettled([
+carregarEventos(),
+carregarPromocoes(),
+carregarAvisos(),
+carregarGaleria()
+]);
+});    if (aviso.descricao) {
         card.appendChild(criarElemento("p", "", aviso.descricao));
       }
 
